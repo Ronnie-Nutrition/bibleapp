@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is the owner
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+
+    // MARK: - Lessons Collection (Public Read, Admin Write)
+    match /lessons/{lessonId} {
+      // Any authenticated user can read lessons
+      allow read: if isAuth();
+
+      // Only admins can create, update, delete lessons
+      allow create, update, delete: if isAdmin();
+    }
+
+    // MARK: - Users Collection (Owner Access)
+    match /users/{userId} {
+      // User can read their own data
+      allow read: if isOwner(userId);
+
+      // User can create/update their own data
+      allow create, update: if isOwner(userId);
+
+      // Only admins can delete user accounts
+      allow delete: if isAdmin();
+
+      // MARK: - User Progress Sub-Collection
+      match /progress/{progressId} {
+        // User can read their own progress
+        allow read: if isOwner(userId);
+
+        // User can write their own progress
+        allow create, update: if isOwner(userId);
+
+        // User can delete their own progress
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // MARK: - Notifications Collection (Admin Write, User Read)
+    match /notifications/{notificationId} {
+      // Authenticated users can read notifications
+      allow read: if isAuth();
+
+      // Only admins can write notifications
+      allow write: if isAdmin();
+    }
+
+    // MARK: - Default Deny (Security First)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

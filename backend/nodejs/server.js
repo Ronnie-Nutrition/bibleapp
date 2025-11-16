@@ -1,7 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-const admin = require('firebase-admin');
 require('dotenv').config();
+
+// Initialize Firebase Admin SDK
+const { admin, db, auth, messaging } = require('./config/firebase');
 
 // Initialize Express app
 const app = express();
@@ -9,17 +11,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-
-// Initialize Firebase Admin SDK
-// Note: In production, use environment variables for credentials
-// const serviceAccount = require('./config/firebase-key.json');
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   databaseURL: process.env.FIREBASE_DATABASE_URL
-// });
-
-const db = admin.firestore();
-const messaging = admin.messaging();
+app.use(express.urlencoded({ extended: true }));
 
 // MARK: - Health Check
 app.get('/health', (req, res) => {
@@ -33,19 +25,20 @@ authRouter.post('/register', async (req, res) => {
   try {
     const { email, password, displayName } = req.body;
 
-    const userRecord = await admin.auth().createUser({
+    const userRecord = await auth.createUser({
       email,
       password,
       displayName
     });
 
     // Create user document in Firestore
+    const { FieldValue } = require('firebase-admin/firestore');
     await db.collection('users').doc(userRecord.uid).set({
       id: userRecord.uid,
       email,
       displayName,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
       preferences: {
         notificationsEnabled: true,
         emailNotifications: true,
@@ -71,7 +64,7 @@ authRouter.post('/login', async (req, res) => {
   try {
     const { email } = req.body;
 
-    const userRecord = await admin.auth().getUserByEmail(email);
+    const userRecord = await auth.getUserByEmail(email);
     const userDoc = await db.collection('users').doc(userRecord.uid).get();
 
     if (!userDoc.exists) {
