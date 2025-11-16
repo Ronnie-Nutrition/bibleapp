@@ -136,37 +136,194 @@ lessonsRouter.get('/category/:category', async (req, res) => {
 app.use('/api/lessons', lessonsRouter);
 
 // MARK: - Push Notifications Routes
+const notificationService = require('./services/notificationService');
 const notificationsRouter = express.Router();
 
-notificationsRouter.post('/send', async (req, res) => {
+/**
+ * POST /api/notifications/send-topic
+ * Send notification to all users subscribed to a topic
+ */
+notificationsRouter.post('/send-topic', async (req, res) => {
   try {
     const { topic, title, body, data } = req.body;
 
-    const message = {
-      notification: { title, body },
-      data: data || {},
-      topic
-    };
+    if (!topic || !title || !body) {
+      return res.status(400).json({
+        error: 'Missing required fields: topic, title, body'
+      });
+    }
 
-    const response = await messaging.send(message);
-    res.json({ messageId: response });
+    const messageId = await notificationService.sendToTopic(topic, title, body, data);
+    res.json({ success: true, messageId });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-notificationsRouter.post('/send-to-device', async (req, res) => {
+/**
+ * POST /api/notifications/send-user
+ * Send notification to a specific user's registered devices
+ */
+notificationsRouter.post('/send-user', async (req, res) => {
   try {
-    const { token, title, body, data } = req.body;
+    const { userId, title, body, data } = req.body;
 
-    const message = {
-      notification: { title, body },
-      data: data || {},
-      token
-    };
+    if (!userId || !title || !body) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, title, body'
+      });
+    }
 
-    const response = await messaging.send(message);
-    res.json({ messageId: response });
+    const responses = await notificationService.sendToUser(userId, title, body, data);
+    res.json({ success: true, responses });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/subscribe
+ * Subscribe user's devices to a topic
+ */
+notificationsRouter.post('/subscribe', async (req, res) => {
+  try {
+    const { tokens, topic } = req.body;
+
+    if (!tokens || !Array.isArray(tokens) || !topic) {
+      return res.status(400).json({
+        error: 'Missing required fields: tokens (array), topic'
+      });
+    }
+
+    await notificationService.subscribeToTopic(tokens, topic);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/unsubscribe
+ * Unsubscribe user's devices from a topic
+ */
+notificationsRouter.post('/unsubscribe', async (req, res) => {
+  try {
+    const { tokens, topic } = req.body;
+
+    if (!tokens || !Array.isArray(tokens) || !topic) {
+      return res.status(400).json({
+        error: 'Missing required fields: tokens (array), topic'
+      });
+    }
+
+    await notificationService.unsubscribeFromTopic(tokens, topic);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/send-daily-reminder
+ * Send daily lesson reminder to all subscribed users
+ */
+notificationsRouter.post('/send-daily-reminder', async (req, res) => {
+  try {
+    const { lessonId, lessonTitle, lessonCategory } = req.body;
+
+    if (!lessonId || !lessonTitle) {
+      return res.status(400).json({
+        error: 'Missing required fields: lessonId, lessonTitle'
+      });
+    }
+
+    const messageId = await notificationService.sendDailyLessonReminder(
+      lessonId,
+      lessonTitle,
+      lessonCategory
+    );
+    res.json({ success: true, messageId });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/send-batch
+ * Send notification to multiple users
+ */
+notificationsRouter.post('/send-batch', async (req, res) => {
+  try {
+    const { userIds, title, body, data } = req.body;
+
+    if (!Array.isArray(userIds) || !title || !body) {
+      return res.status(400).json({
+        error: 'Missing required fields: userIds (array), title, body'
+      });
+    }
+
+    const results = await notificationService.sendBatchNotification(
+      userIds,
+      title,
+      body,
+      data
+    );
+    res.json({ success: true, results });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/save-token
+ * Save FCM token for a user (called from iOS app)
+ */
+notificationsRouter.post('/save-token', async (req, res) => {
+  try {
+    const { userId, token } = req.body;
+
+    if (!userId || !token) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, token'
+      });
+    }
+
+    await notificationService.saveFCMToken(userId, token);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/remove-token
+ * Remove FCM token for a user (called on logout)
+ */
+notificationsRouter.post('/remove-token', async (req, res) => {
+  try {
+    const { userId, token } = req.body;
+
+    if (!userId || !token) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, token'
+      });
+    }
+
+    await notificationService.removeFCMToken(userId, token);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/notifications/stats
+ * Get notification statistics
+ */
+notificationsRouter.get('/stats', async (req, res) => {
+  try {
+    const stats = await notificationService.getNotificationStats();
+    res.json(stats);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
