@@ -188,6 +188,12 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
         Messaging.messaging().unsubscribe(fromTopic: topic)
     }
 
+    // MARK: - User Methods
+
+    func fetchUser(id: String) async throws -> User {
+        return try await fetchFirestoreUser(id: id)
+    }
+
     // MARK: - Private Methods
 
     private func fetchFirestoreUser(id: String) async throws -> User {

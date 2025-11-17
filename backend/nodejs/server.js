@@ -331,15 +331,84 @@ notificationsRouter.get('/stats', async (req, res) => {
 
 app.use('/api/notifications', notificationsRouter);
 
+// MARK: - Scheduler Routes
+const schedulerService = require('./services/schedulerService');
+const schedulerRouter = express.Router();
+
+/**
+ * GET /api/scheduler/status
+ * Get scheduler status and active jobs
+ */
+schedulerRouter.get('/status', (req, res) => {
+  try {
+    const status = schedulerService.getStatus();
+    res.json({ success: true, status });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/scheduler/history
+ * Get notification history
+ */
+schedulerRouter.get('/history', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const history = await schedulerService.getNotificationHistory(userId);
+    res.json({ success: true, history });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/scheduler/update-time
+ * Update user's preferred notification time
+ */
+schedulerRouter.post('/update-time', async (req, res) => {
+  try {
+    const { userId, time } = req.body;
+
+    if (!userId || !time) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, time (HH:mm format)'
+      });
+    }
+
+    // Validate time format
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(time)) {
+      return res.status(400).json({
+        error: 'Invalid time format. Use HH:mm (24-hour format)'
+      });
+    }
+
+    await schedulerService.updateUserNotificationTime(userId, time);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.use('/api/scheduler', schedulerRouter);
+
 // MARK: - Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-// MARK: - Start Server
+// MARK: - Start Server and Schedulers
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Bible App Backend running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+
+  // Start schedulers
+  schedulerService.startDailyLessonScheduler();
+
+  // Optionally start personalized schedulers (requires more resources)
+  // Uncomment to enable personalized notification times
+  // schedulerService.startPersonalizedSchedulers();
 });

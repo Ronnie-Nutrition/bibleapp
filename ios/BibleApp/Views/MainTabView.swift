@@ -198,6 +198,7 @@ struct LessonsListView: View {
 // MARK: - Profile View
 struct ProfileView: View {
     @StateObject private var authManager = AuthenticationManager.shared
+    @State private var showNotificationPreferences = false
 
     var body: some View {
         NavigationStack {
@@ -240,19 +241,40 @@ struct ProfileView: View {
                     }
                     .padding(.horizontal, 16)
 
-                    // Sign Out Button
-                    Button(action: {
-                        authManager.signOut()
-                    }) {
-                        HStack {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                            Text("Sign Out")
+                    // Settings Buttons
+                    VStack(spacing: 12) {
+                        // Notification Preferences Button
+                        Button(action: {
+                            showNotificationPreferences = true
+                        }) {
+                            HStack {
+                                Image(systemName: "bell.badge.fill")
+                                Text("Notification Preferences")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(12)
+                            .background(Color.blue.opacity(0.1))
+                            .foregroundColor(.blue)
+                            .cornerRadius(8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(12)
-                        .background(Color.red.opacity(0.1))
-                        .foregroundColor(.red)
-                        .cornerRadius(8)
+
+                        // Sign Out Button
+                        Button(action: {
+                            authManager.signOut()
+                        }) {
+                            HStack {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                Text("Sign Out")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(12)
+                            .background(Color.red.opacity(0.1))
+                            .foregroundColor(.red)
+                            .cornerRadius(8)
+                        }
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 20)
@@ -262,6 +284,9 @@ struct ProfileView: View {
             }
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showNotificationPreferences) {
+                NotificationPreferencesView(viewModel: NotificationPreferencesViewModel())
+            }
         }
     }
 }
