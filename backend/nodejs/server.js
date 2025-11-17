@@ -20,60 +20,151 @@ app.get('/health', (req, res) => {
 
 // MARK: - Authentication Routes
 const authRouter = express.Router();
+const authService = require('./services/authenticationService');
 
 authRouter.post('/register', async (req, res) => {
   try {
     const { email, password, displayName } = req.body;
 
-    const userRecord = await auth.createUser({
-      email,
-      password,
-      displayName
-    });
+    // Validate required fields
+    if (!email || !password || !displayName) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        fields: {
+          email: !email ? 'Email is required' : null,
+          password: !password ? 'Password is required' : null,
+          displayName: !displayName ? 'Display name is required' : null
+        }
+      });
+    }
 
-    // Create user document in Firestore
-    const { FieldValue } = require('firebase-admin/firestore');
-    await db.collection('users').doc(userRecord.uid).set({
-      id: userRecord.uid,
-      email,
-      displayName,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-      preferences: {
-        notificationsEnabled: true,
-        emailNotifications: true,
-        theme: 'system'
-      },
-      stats: {
-        lessonsCompleted: 0,
-        lessonsStarted: 0,
-        totalTimeSpent: 0,
-        favoriteCount: 0,
-        currentStreak: 0,
-        longestStreak: 0
-      }
-    });
-
-    res.status(201).json({ userId: userRecord.uid, email });
+    const result = await authService.registerUser({ email, password, displayName });
+    res.status(201).json(result);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: error.message,
+      code: error.code || 'REGISTRATION_ERROR',
+      details: error.details || undefined
+    });
   }
 });
 
 authRouter.post('/login', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body;
 
-    const userRecord = await auth.getUserByEmail(email);
-    const userDoc = await db.collection('users').doc(userRecord.uid).get();
-
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: 'User not found' });
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({
+        error: 'Email and password are required',
+        code: 'MISSING_CREDENTIALS'
+      });
     }
 
-    res.json({ userId: userRecord.uid, user: userDoc.data() });
+    const result = await authService.authenticateUser(email, password);
+    res.json(result);
   } catch (error) {
-    res.status(401).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: error.message,
+      code: error.code || 'LOGIN_ERROR'
+    });
+  }
+});
+
+authRouter.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        error: 'Email is required',
+        code: 'MISSING_EMAIL'
+      });
+    }
+
+    const result = await authService.generatePasswordResetLink(email);
+    res.json(result);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: error.message,
+      code: error.code || 'RESET_ERROR'
+    });
+  }
+});
+
+authRouter.post('/reset-password', async (req, res) => {
+  try {
+    const { userId, currentPassword, newPassword } = req.body;
+
+    if (!userId || !currentPassword || !newPassword) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        fields: {
+          userId: !userId ? 'User ID is required' : null,
+          currentPassword: !currentPassword ? 'Current password is required' : null,
+          newPassword: !newPassword ? 'New password is required' : null
+        }
+      });
+    }
+
+    const result = await authService.resetPassword(userId, currentPassword, newPassword);
+    res.json(result);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: error.message,
+      code: error.code || 'RESET_ERROR',
+      details: error.details || undefined
+    });
+  }
+});
+
+authRouter.post('/update-email', async (req, res) => {
+  try {
+    const { userId, newEmail } = req.body;
+
+    if (!userId || !newEmail) {
+      return res.status(400).json({
+        error: 'User ID and new email are required',
+        code: 'MISSING_FIELDS'
+      });
+    }
+
+    const result = await authService.updateUserEmail(userId, newEmail);
+    res.json(result);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: error.message,
+      code: error.code || 'UPDATE_ERROR'
+    });
+  }
+});
+
+authRouter.get('/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        error: 'User ID is required',
+        code: 'MISSING_USER_ID'
+      });
+    }
+
+    const user = await authService.getUserById(userId);
+    res.json(user);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: error.message,
+      code: error.code || 'FETCH_ERROR'
+    });
   }
 });
 

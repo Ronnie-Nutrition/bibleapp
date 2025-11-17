@@ -24,7 +24,8 @@
     "express-validator": "^7.0.0",
     "jsonwebtoken": "^9.1.0",
     "axios": "^1.6.2",
-    "node-cron": "^3.0.2"
+    "node-cron": "^3.0.2",
+    "email-validator": "^2.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
