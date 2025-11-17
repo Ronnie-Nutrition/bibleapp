@@ -393,6 +393,172 @@ schedulerRouter.post('/update-time', async (req, res) => {
 
 app.use('/api/scheduler', schedulerRouter);
 
+// MARK: - User Preferences Routes
+const preferencesService = require('./services/preferencesService');
+const preferencesRouter = express.Router();
+
+/**
+ * GET /api/preferences
+ * Get user preferences
+ */
+preferencesRouter.get('/', async (req, res) => {
+  try {
+    const userId = req.query.userId;
+
+    if (!userId) {
+      return res.status(400).json({
+        error: 'Missing required field: userId'
+      });
+    }
+
+    const preferences = await preferencesService.getUserPreferences(userId);
+    res.json({ success: true, preferences });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/preferences/update
+ * Update a single preference
+ */
+preferencesRouter.post('/update', async (req, res) => {
+  try {
+    const { userId, preference, value } = req.body;
+
+    if (!userId || !preference) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, preference'
+      });
+    }
+
+    await preferencesService.updatePreference(userId, preference, value);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/preferences/notification-type
+ * Update notification type preferences
+ */
+preferencesRouter.post('/notification-type', async (req, res) => {
+  try {
+    const { userId, type, enabled } = req.body;
+
+    if (!userId || !type || enabled === undefined) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, type, enabled'
+      });
+    }
+
+    await preferencesService.updateNotificationType(userId, type, enabled);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/preferences/categories
+ * Update preferred lesson categories
+ */
+preferencesRouter.post('/categories', async (req, res) => {
+  try {
+    const { userId, categories } = req.body;
+
+    if (!userId || !Array.isArray(categories)) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, categories (array)'
+      });
+    }
+
+    await preferencesService.updatePreferredCategories(userId, categories);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/preferences/daily-time
+ * Update daily reminder time
+ */
+preferencesRouter.post('/daily-time', async (req, res) => {
+  try {
+    const { userId, time } = req.body;
+
+    if (!userId || !time) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, time (HH:mm format)'
+      });
+    }
+
+    await preferencesService.updateDailyReminderTime(userId, time);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/preferences/batch-update
+ * Batch update multiple preferences
+ */
+preferencesRouter.post('/batch-update', async (req, res) => {
+  try {
+    const { userId, updates } = req.body;
+
+    if (!userId || !updates || typeof updates !== 'object') {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, updates (object)'
+      });
+    }
+
+    await preferencesService.updatePreferences(userId, updates);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/preferences/reset
+ * Reset preferences to defaults
+ */
+preferencesRouter.post('/reset', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        error: 'Missing required field: userId'
+      });
+    }
+
+    await preferencesService.resetPreferences(userId);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/preferences/stats
+ * Get preference statistics
+ */
+preferencesRouter.get('/stats', async (req, res) => {
+  try {
+    const stats = await preferencesService.getPreferenceStatistics();
+    res.json({ success: true, stats });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.use('/api/preferences', preferencesRouter);
+
 // MARK: - Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
