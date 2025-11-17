@@ -80,6 +80,7 @@ yarn-error.log
 google-services.json
 GoogleService-Info.plist
 firebase-debug.log
+firebase-key.json
 *.json.bak
 
 # Environment variables

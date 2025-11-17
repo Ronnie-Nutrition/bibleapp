@@ -6,7 +6,7 @@
  */
 
 const { db, auth } = require('../config/firebase');
-const validator = require('email-validator');
+const validator = require('validator');
 
 class AuthenticationService {
   /**
@@ -18,7 +18,7 @@ class AuthenticationService {
     if (!email || typeof email !== 'string') {
       return false;
     }
-    return validator.validate(email);
+    return validator.isEmail(email);
   }
 
   /**
