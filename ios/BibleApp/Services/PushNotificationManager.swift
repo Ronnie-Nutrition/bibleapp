@@ -10,7 +10,7 @@ class PushNotificationManager: NSObject, ObservableObject {
     @Published var isNotificationPermissionGranted = false
     @Published var fcmToken: String?
 
-    private let firebaseService = FirebaseService.shared
+    private let apiClient = APIClient.shared
     private var notificationHistory: [[String: Any]] = []
 
     // MARK: - Initialization
@@ -71,14 +71,10 @@ class PushNotificationManager: NSObject, ObservableObject {
 
     func saveFCMToken(_ token: String, for userId: String) async {
         do {
-            let networkService = NetworkService()
-            let response = try await networkService.request(
-                endpoint: "/api/notifications/save-token",
-                method: "POST",
-                body: ["userId": userId, "token": token]
-            )
-
+            try await apiClient.saveFCMToken(userId: userId, token: token)
             print("✓ FCM Token saved to backend for user: \(userId)")
+        } catch let error as APIError {
+            print("✗ Error saving FCM token: \(error.localizedDescription)")
         } catch {
             print("✗ Error saving FCM token: \(error.localizedDescription)")
         }
@@ -86,14 +82,10 @@ class PushNotificationManager: NSObject, ObservableObject {
 
     func removeFCMToken(_ token: String, for userId: String) async {
         do {
-            let networkService = NetworkService()
-            let _ = try await networkService.request(
-                endpoint: "/api/notifications/remove-token",
-                method: "POST",
-                body: ["userId": userId, "token": token]
-            )
-
+            try await apiClient.removeFCMToken(userId: userId, token: token)
             print("✓ FCM Token removed from backend")
+        } catch let error as APIError {
+            print("✗ Error removing FCM token: \(error.localizedDescription)")
         } catch {
             print("✗ Error removing FCM token: \(error.localizedDescription)")
         }
@@ -220,14 +212,10 @@ class PushNotificationManager: NSObject, ObservableObject {
                 return
             }
 
-            let networkService = NetworkService()
-            let _ = try await networkService.request(
-                endpoint: "/api/notifications/subscribe",
-                method: "POST",
-                body: ["tokens": [token], "topic": topic]
-            )
-
+            try await apiClient.subscribeToTopic(tokens: [token], topic: topic)
             print("✓ Subscribed to topic: \(topic)")
+        } catch let error as APIError {
+            print("✗ Error subscribing to topic: \(error.localizedDescription)")
         } catch {
             print("✗ Error subscribing to topic: \(error.localizedDescription)")
         }
@@ -240,14 +228,10 @@ class PushNotificationManager: NSObject, ObservableObject {
                 return
             }
 
-            let networkService = NetworkService()
-            let _ = try await networkService.request(
-                endpoint: "/api/notifications/unsubscribe",
-                method: "POST",
-                body: ["tokens": [token], "topic": topic]
-            )
-
+            try await apiClient.unsubscribeFromTopic(tokens: [token], topic: topic)
             print("✓ Unsubscribed from topic: \(topic)")
+        } catch let error as APIError {
+            print("✗ Error unsubscribing from topic: \(error.localizedDescription)")
         } catch {
             print("✗ Error unsubscribing from topic: \(error.localizedDescription)")
         }
@@ -262,31 +246,4 @@ class PushNotificationManager: NSObject, ObservableObject {
     }
 }
 
-// MARK: - Network Service for Notifications
-// (This would typically be in a separate NetworkService file)
-class NetworkService {
-    func request(endpoint: String, method: String = "GET", body: [String: Any]? = nil) async throws -> [String: Any] {
-        let baseURL = "http://localhost:3000" // TODO: Use environment configuration
-        guard let url = URL(string: baseURL + endpoint) else {
-            throw NSError(domain: "InvalidURL", code: -1)
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        if let body = body {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        }
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw NSError(domain: "HTTPError", code: -1)
-        }
-
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
-        return json
-    }
-}
+// Note: Networking is now handled by APIClient service
