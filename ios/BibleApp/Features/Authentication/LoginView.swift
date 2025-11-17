@@ -149,7 +149,7 @@ class LoginViewModel: ObservableObject {
     @Published var emailError: String?
     @Published var passwordError: String?
 
-    private let authManager = AuthenticationManager.shared
+    private let apiClient = APIClient.shared
 
     var isFormValid: Bool {
         !email.isEmpty && !password.isEmpty && emailError == nil
@@ -190,9 +190,19 @@ class LoginViewModel: ObservableObject {
             return
         }
 
-        await authManager.signIn(email: email, password: password)
-        isLoading = false
-        errorMessage = authManager.errorMessage
+        do {
+            // Call backend login API
+            let response = try await apiClient.loginUser(email: email, password: password)
+            // Success - token is automatically saved in APIClient
+            isLoading = false
+            errorMessage = nil
+        } catch let error as APIError {
+            isLoading = false
+            errorMessage = error.localizedDescription
+        } catch {
+            isLoading = false
+            errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+        }
     }
 }
 
@@ -375,7 +385,7 @@ class SignUpViewModel: ObservableObject {
     @Published var passwordError: String?
     @Published var confirmPasswordError: String?
 
-    private let authManager = AuthenticationManager.shared
+    private let apiClient = APIClient.shared
 
     var isFormValid: Bool {
         !email.isEmpty && !password.isEmpty && !displayName.isEmpty &&
@@ -493,9 +503,23 @@ class SignUpViewModel: ObservableObject {
             return
         }
 
-        await authManager.signUp(email: email, password: password, displayName: displayName)
-        isLoading = false
-        errorMessage = authManager.errorMessage
+        do {
+            // Call backend registration API
+            let response = try await apiClient.registerUser(
+                email: email,
+                password: password,
+                displayName: displayName
+            )
+            // Success - token is automatically saved in APIClient
+            isLoading = false
+            errorMessage = nil
+        } catch let error as APIError {
+            isLoading = false
+            errorMessage = error.localizedDescription
+        } catch {
+            isLoading = false
+            errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+        }
     }
 }
 
@@ -690,7 +714,7 @@ class ForgotPasswordViewModel: ObservableObject {
     @Published var successMessage: String?
     @Published var emailError: String?
 
-    private let authManager = AuthenticationManager.shared
+    private let apiClient = APIClient.shared
 
     private func validateEmail() {
         if email.isEmpty {
@@ -720,10 +744,18 @@ class ForgotPasswordViewModel: ObservableObject {
             return
         }
 
-        // Call backend forgot password endpoint
-        // This is a placeholder - implement the actual API call
-        successMessage = "Reset link sent to \(email). Check your email for instructions."
-        isLoading = false
+        do {
+            // Call backend forgot password endpoint
+            try await apiClient.forgotPassword(email: email)
+            successMessage = "Reset link sent to \(email). Check your email for instructions."
+            isLoading = false
+        } catch let error as APIError {
+            isLoading = false
+            errorMessage = error.localizedDescription
+        } catch {
+            isLoading = false
+            errorMessage = "Failed to send reset email: \(error.localizedDescription)"
+        }
     }
 }
 
