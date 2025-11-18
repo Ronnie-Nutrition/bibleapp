@@ -15,7 +15,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // MARK: - Health Check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const { isInitialized } = require('./config/firebase');
+
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    services: {
+      firebase: isInitialized ? 'connected' : 'not configured',
+      server: 'running'
+    },
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // MARK: - Authentication Routes
