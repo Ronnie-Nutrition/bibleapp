@@ -232,6 +232,10 @@ lessonsRouter.get('/category/:category', async (req, res) => {
 
 app.use('/api/lessons', lessonsRouter);
 
+// MARK: - Progress Tracking Routes
+const progressRoutes = require('./routes/progressRoutes');
+app.use('/api/progress', progressRoutes);
+
 // MARK: - Push Notifications Routes
 const notificationService = require('./services/notificationService');
 const notificationsRouter = express.Router();
