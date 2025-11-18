@@ -11,6 +11,8 @@ const path = require('path');
 const fs = require('fs');
 
 // Check if Firebase is already initialized
+let firebaseInitialized = false;
+
 if (admin.apps.length === 0) {
   const nodeEnv = process.env.NODE_ENV || 'development';
 
@@ -34,6 +36,7 @@ if (admin.apps.length === 0) {
         credential: admin.credential.cert(serviceAccount),
         databaseURL: process.env.FIREBASE_DATABASE_URL
       });
+      firebaseInitialized = true;
     } else {
       // In development, try to load from file
       const keyPath = path.join(__dirname, 'firebase-key.json');
@@ -45,7 +48,12 @@ if (admin.apps.length === 0) {
         console.warn('\n   Or set environment variables:');
         console.warn('   - FIREBASE_PROJECT_ID');
         console.warn('   - FIREBASE_PRIVATE_KEY');
-        console.warn('   - FIREBASE_CLIENT_EMAIL\n');
+        console.warn('   - FIREBASE_CLIENT_EMAIL');
+        console.warn('\n   Continuing without Firebase - some features may not work.\n');
+
+        // Initialize without credentials for development
+        // This allows the server to start even without Firebase configured
+        firebaseInitialized = false;
       } else {
         const serviceAccount = require(keyPath);
 
@@ -56,19 +64,35 @@ if (admin.apps.length === 0) {
         });
 
         console.log('✓ Firebase initialized with service account');
+        firebaseInitialized = true;
       }
     }
   } catch (error) {
     console.error('❌ Error initializing Firebase:', error.message);
-    throw error;
+    console.error('   Continuing without Firebase - some features may not work.\n');
+    firebaseInitialized = false;
   }
 }
 
-// Export Firebase services
-module.exports = {
-  admin,
-  db: admin.firestore(),
-  auth: admin.auth(),
-  messaging: admin.messaging(),
-  storage: admin.storage()
-};
+// Export Firebase services only if initialized
+// If not initialized, export null values with warning messages
+if (firebaseInitialized) {
+  module.exports = {
+    admin,
+    db: admin.firestore(),
+    auth: admin.auth(),
+    messaging: admin.messaging(),
+    storage: admin.storage(),
+    initialized: true
+  };
+} else {
+  // Create stub exports when Firebase is not initialized
+  module.exports = {
+    admin: null,
+    db: null,
+    auth: null,
+    messaging: null,
+    storage: null,
+    initialized: false
+  };
+}
