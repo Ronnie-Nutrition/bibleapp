@@ -10,6 +10,8 @@ const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs');
 
+let firebaseInitialized = false;
+
 // Check if Firebase is already initialized
 if (admin.apps.length === 0) {
   const nodeEnv = process.env.NODE_ENV || 'development';
@@ -34,6 +36,7 @@ if (admin.apps.length === 0) {
         credential: admin.credential.cert(serviceAccount),
         databaseURL: process.env.FIREBASE_DATABASE_URL
       });
+      firebaseInitialized = true;
     } else {
       // In development, try to load from file
       const keyPath = path.join(__dirname, 'firebase-key.json');
@@ -46,6 +49,7 @@ if (admin.apps.length === 0) {
         console.warn('   - FIREBASE_PROJECT_ID');
         console.warn('   - FIREBASE_PRIVATE_KEY');
         console.warn('   - FIREBASE_CLIENT_EMAIL\n');
+        console.warn('   Firebase features will be disabled until configured.\n');
       } else {
         const serviceAccount = require(keyPath);
 
@@ -56,19 +60,23 @@ if (admin.apps.length === 0) {
         });
 
         console.log('✓ Firebase initialized with service account');
+        firebaseInitialized = true;
       }
     }
   } catch (error) {
     console.error('❌ Error initializing Firebase:', error.message);
-    throw error;
+    console.warn('   Firebase features will be disabled.\n');
   }
+} else {
+  firebaseInitialized = true;
 }
 
-// Export Firebase services
+// Export Firebase services only if initialized
 module.exports = {
   admin,
-  db: admin.firestore(),
-  auth: admin.auth(),
-  messaging: admin.messaging(),
-  storage: admin.storage()
+  firebaseInitialized,
+  db: firebaseInitialized ? admin.firestore() : null,
+  auth: firebaseInitialized ? admin.auth() : null,
+  messaging: firebaseInitialized ? admin.messaging() : null,
+  storage: firebaseInitialized ? admin.storage() : null
 };
