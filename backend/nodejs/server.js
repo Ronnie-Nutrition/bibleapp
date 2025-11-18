@@ -5,6 +5,9 @@ require('dotenv').config();
 // Initialize Firebase Admin SDK
 const { admin, db, auth, messaging } = require('./config/firebase');
 
+// Initialize health check service
+const healthCheckService = require('./services/healthCheckService');
+
 // Initialize Express app
 const app = express();
 
@@ -13,20 +16,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MARK: - Health Check
-app.get('/health', (req, res) => {
-  const { isInitialized } = require('./config/firebase');
+// MARK: - Health Check Routes
+const healthRoutes = require('./routes/healthRoutes');
+const { healthCheckLimiter } = require('./middleware/rateLimiter');
 
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    services: {
-      firebase: isInitialized ? 'connected' : 'not configured',
-      server: 'running'
-    },
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
+// Apply rate limiting to health checks
+app.use('/health', healthCheckLimiter);
+app.use('/health', healthRoutes);
 
 // MARK: - Authentication Routes
 const authRouter = express.Router();
@@ -678,4 +674,8 @@ app.listen(PORT, () => {
   // Optionally start personalized schedulers (requires more resources)
   // Uncomment to enable personalized notification times
   // schedulerService.startPersonalizedSchedulers();
+
+  // Mark startup as complete for health checks
+  healthCheckService.markStartupComplete();
+  console.log('✓ All services initialized - server ready');
 });
