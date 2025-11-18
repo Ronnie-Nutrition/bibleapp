@@ -236,6 +236,10 @@ app.use('/api/lessons', lessonsRouter);
 const progressRoutes = require('./routes/progressRoutes');
 app.use('/api/progress', progressRoutes);
 
+// MARK: - Notes Routes
+const notesRoutes = require('./routes/notesRoutes');
+app.use('/api/notes', notesRoutes);
+
 // MARK: - Push Notifications Routes
 const notificationService = require('./services/notificationService');
 const notificationsRouter = express.Router();
