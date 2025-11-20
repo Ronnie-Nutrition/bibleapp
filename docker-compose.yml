@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Bible App Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: bible-app-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # Firebase credentials (provide via .env file)
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_DATABASE_URL=${FIREBASE_DATABASE_URL}
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - bible-app-network
+    labels:
+      - "com.bible-app.service=backend"
+      - "com.bible-app.version=1.0.0"
+
+networks:
+  bible-app-network:
+    driver: bridge
+    name: bible-app-network
