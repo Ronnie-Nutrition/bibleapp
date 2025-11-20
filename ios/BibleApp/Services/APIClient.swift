@@ -555,6 +555,266 @@ class APIClient: NSObject, ObservableObject {
     func checkHealth() async throws -> [String: String] {
         return try await request(method: "GET", endpoint: "/health")
     }
+
+    // MARK: - Progress Tracking Endpoints
+
+    /// Mark a lesson as complete
+    func completeLesson(
+        userId: String,
+        lessonId: String,
+        timeSpent: Int? = nil
+    ) async throws -> ProgressCompletionResponse {
+        struct CompleteLessonRequest: Encodable {
+            let userId: String
+            let lessonId: String
+            let timeSpent: Int?
+        }
+        let request = CompleteLessonRequest(userId: userId, lessonId: lessonId, timeSpent: timeSpent)
+        return try await self.request(
+            method: "POST",
+            endpoint: "/api/progress/complete",
+            body: request
+        )
+    }
+
+    /// Get user's progress (all completed lessons)
+    func getUserProgress(userId: String) async throws -> UserProgress {
+        struct ProgressResponse: Decodable {
+            let success: Bool
+            let progress: UserProgress
+        }
+        let response: ProgressResponse = try await request(
+            method: "GET",
+            endpoint: "/api/progress/\(userId)"
+        )
+        return response.progress
+    }
+
+    /// Get user's progress statistics
+    func getUserProgressStats(userId: String) async throws -> ProgressStats {
+        struct StatsResponse: Decodable {
+            let success: Bool
+            let stats: ProgressStats
+        }
+        let response: StatsResponse = try await request(
+            method: "GET",
+            endpoint: "/api/progress/\(userId)/stats"
+        )
+        return response.stats
+    }
+
+    /// Check if a specific lesson is completed
+    func checkLessonCompletion(userId: String, lessonId: String) async throws -> LessonCompletionStatus {
+        return try await request(
+            method: "GET",
+            endpoint: "/api/progress/\(userId)/lesson/\(lessonId)"
+        )
+    }
+
+    /// Uncomplete a lesson (for corrections)
+    func uncompleteLesson(userId: String, lessonId: String) async throws {
+        struct UncompleteResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        let _: UncompleteResponse = try await request(
+            method: "DELETE",
+            endpoint: "/api/progress/\(userId)/lesson/\(lessonId)"
+        )
+    }
+
+    /// Get lessons completed in a date range
+    func getLessonsInDateRange(
+        userId: String,
+        startDate: Date,
+        endDate: Date
+    ) async throws -> [CompletedLessonInfo] {
+        struct RangeResponse: Decodable {
+            let success: Bool
+            let count: Int
+            let lessons: [CompletedLessonInfo]
+        }
+
+        let formatter = ISO8601DateFormatter()
+        let start = formatter.string(from: startDate)
+        let end = formatter.string(from: endDate)
+
+        let response: RangeResponse = try await request(
+            method: "GET",
+            endpoint: "/api/progress/\(userId)/range?startDate=\(start)&endDate=\(end)"
+        )
+        return response.lessons
+    }
+
+    /// Get leaderboard (top users by completion)
+    func getLeaderboard(limit: Int = 10) async throws -> [LeaderboardEntry] {
+        struct LeaderboardResponse: Decodable {
+            let success: Bool
+            let count: Int
+            let leaderboard: [LeaderboardEntry]
+        }
+        let response: LeaderboardResponse = try await request(
+            method: "GET",
+            endpoint: "/api/progress/leaderboard?limit=\(limit)"
+        )
+        return response.leaderboard
+    }
+
+    // MARK: - Notes Endpoints
+
+    /// Create a new note for a lesson
+    func createNote(
+        userId: String,
+        lessonId: String,
+        content: String,
+        tags: [String] = []
+    ) async throws -> LessonNote {
+        struct CreateNoteRequest: Encodable {
+            let userId: String
+            let lessonId: String
+            let content: String
+            let tags: [String]
+        }
+        struct NoteResponse: Decodable {
+            let success: Bool
+            let note: LessonNote
+        }
+        let request = CreateNoteRequest(userId: userId, lessonId: lessonId, content: content, tags: tags)
+        let response: NoteResponse = try await self.request(
+            method: "POST",
+            endpoint: "/api/notes/create",
+            body: request
+        )
+        return response.note
+    }
+
+    /// Update an existing note
+    func updateNote(
+        noteId: String,
+        userId: String,
+        content: String? = nil,
+        tags: [String]? = nil
+    ) async throws -> LessonNote {
+        struct UpdateNoteRequest: Encodable {
+            let userId: String
+            let content: String?
+            let tags: [String]?
+        }
+        struct NoteResponse: Decodable {
+            let success: Bool
+            let note: LessonNote
+        }
+        let request = UpdateNoteRequest(userId: userId, content: content, tags: tags)
+        let response: NoteResponse = try await self.request(
+            method: "PUT",
+            endpoint: "/api/notes/\(noteId)",
+            body: request
+        )
+        return response.note
+    }
+
+    /// Delete a note
+    func deleteNote(noteId: String, userId: String) async throws {
+        struct DeleteResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        let _: DeleteResponse = try await request(
+            method: "DELETE",
+            endpoint: "/api/notes/\(noteId)?userId=\(userId)"
+        )
+    }
+
+    /// Get a specific note
+    func getNote(noteId: String, userId: String) async throws -> LessonNote {
+        struct NoteResponse: Decodable {
+            let success: Bool
+            let note: LessonNote
+        }
+        let response: NoteResponse = try await request(
+            method: "GET",
+            endpoint: "/api/notes/\(noteId)?userId=\(userId)"
+        )
+        return response.note
+    }
+
+    /// Get all user notes
+    func getUserNotes(
+        userId: String,
+        limit: Int = 50,
+        offset: Int = 0,
+        sortBy: String = "updatedAt",
+        sortOrder: String = "desc"
+    ) async throws -> [LessonNote] {
+        struct NotesResponse: Decodable {
+            let success: Bool
+            let count: Int
+            let notes: [LessonNote]
+        }
+        let response: NotesResponse = try await request(
+            method: "GET",
+            endpoint: "/api/notes/user/\(userId)?limit=\(limit)&offset=\(offset)&sortBy=\(sortBy)&sortOrder=\(sortOrder)"
+        )
+        return response.notes
+    }
+
+    /// Get notes for a specific lesson
+    func getNotesForLesson(userId: String, lessonId: String) async throws -> [LessonNote] {
+        struct NotesResponse: Decodable {
+            let success: Bool
+            let count: Int
+            let notes: [LessonNote]
+        }
+        let response: NotesResponse = try await request(
+            method: "GET",
+            endpoint: "/api/notes/user/\(userId)/lesson/\(lessonId)"
+        )
+        return response.notes
+    }
+
+    /// Search notes by content
+    func searchNotes(userId: String, searchTerm: String, limit: Int = 20) async throws -> [LessonNote] {
+        struct SearchResponse: Decodable {
+            let success: Bool
+            let count: Int
+            let searchTerm: String
+            let notes: [LessonNote]
+        }
+        let encodedTerm = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let response: SearchResponse = try await request(
+            method: "GET",
+            endpoint: "/api/notes/user/\(userId)/search?q=\(encodedTerm)&limit=\(limit)"
+        )
+        return response.notes
+    }
+
+    /// Get notes by tag
+    func getNotesByTag(userId: String, tag: String) async throws -> [LessonNote] {
+        struct NotesResponse: Decodable {
+            let success: Bool
+            let count: Int
+            let tag: String
+            let notes: [LessonNote]
+        }
+        let response: NotesResponse = try await request(
+            method: "GET",
+            endpoint: "/api/notes/user/\(userId)/tag/\(tag)"
+        )
+        return response.notes
+    }
+
+    /// Get user's note statistics
+    func getUserNoteStats(userId: String) async throws -> NoteStats {
+        struct StatsResponse: Decodable {
+            let success: Bool
+            let stats: NoteStats
+        }
+        let response: StatsResponse = try await request(
+            method: "GET",
+            endpoint: "/api/notes/user/\(userId)/stats"
+        )
+        return response.stats
+    }
 }
 
 // MARK: - Keychain Service
