@@ -198,7 +198,9 @@ struct LessonsListView: View {
 // MARK: - Profile View
 struct ProfileView: View {
     @StateObject private var authManager = AuthenticationManager.shared
+    @EnvironmentObject var themeManager: ThemeManager
     @State private var showNotificationPreferences = false
+    @State private var showDarkModeSettings = false
 
     var body: some View {
         NavigationStack {
@@ -243,6 +245,22 @@ struct ProfileView: View {
 
                     // Settings Buttons
                     VStack(spacing: 12) {
+                        // Dark Mode Button
+                        NavigationLink(destination: DarkModeSettingsView().environmentObject(themeManager)) {
+                            HStack {
+                                Image(systemName: themeManager.isDarkMode ? "moon.stars.fill" : "sun.max.fill")
+                                Text("Dark Mode")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(12)
+                            .background(Color.purple.opacity(0.1))
+                            .foregroundColor(.purple)
+                            .cornerRadius(8)
+                        }
+
                         // Notification Preferences Button
                         Button(action: {
                             showNotificationPreferences = true

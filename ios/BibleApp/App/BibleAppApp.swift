@@ -8,13 +8,18 @@ struct BibleAppApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authManager = AuthenticationManager.shared
     @StateObject private var notificationManager = PushNotificationManager.shared
+    @StateObject private var themeManager = ThemeManager.shared
 
     var body: some Scene {
         WindowGroup {
             if authManager.isAuthenticated {
                 MainTabView()
+                    .environmentObject(themeManager)
+                    .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
             } else {
                 LoginView()
+                    .environmentObject(themeManager)
+                    .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
             }
         }
     }
