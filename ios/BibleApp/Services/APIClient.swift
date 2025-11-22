@@ -316,6 +316,149 @@ class APIClient: NSObject, ObservableObject {
         )
     }
 
+    // MARK: - Progress and Favorites Endpoints
+
+    /// Save lesson progress
+    func saveLessonProgress(
+        userId: String,
+        lessonId: String,
+        completionPercentage: Int = 100,
+        timeSpent: Int = 0
+    ) async throws {
+        struct ProgressRequest: Encodable {
+            let userId: String
+            let lessonId: String
+            let completionPercentage: Int
+            let timeSpent: Int
+            let completedAt: String
+
+            init(userId: String, lessonId: String, completionPercentage: Int, timeSpent: Int) {
+                self.userId = userId
+                self.lessonId = lessonId
+                self.completionPercentage = completionPercentage
+                self.timeSpent = timeSpent
+                self.completedAt = ISO8601DateFormatter().string(from: Date())
+            }
+        }
+
+        let request = ProgressRequest(
+            userId: userId,
+            lessonId: lessonId,
+            completionPercentage: completionPercentage,
+            timeSpent: timeSpent
+        )
+
+        let _: [String: Any] = try await self.request(
+            method: "POST",
+            endpoint: "/api/progress/save",
+            body: request
+        )
+    }
+
+    /// Get user progress for all lessons
+    func getUserProgress(userId: String) async throws -> [[String: Any]] {
+        struct ProgressResponse: Decodable {
+            let success: Bool
+            let progress: [[String: Any]]
+        }
+
+        let response: ProgressResponse = try await request(
+            method: "GET",
+            endpoint: "/api/progress/\(userId)"
+        )
+        return response.progress
+    }
+
+    /// Get progress for a specific lesson
+    func getProgressForLesson(userId: String, lessonId: String) async throws -> [String: Any]? {
+        struct ProgressItemResponse: Decodable {
+            let success: Bool
+            let progress: [String: Any]?
+        }
+
+        do {
+            let response: ProgressItemResponse = try await request(
+                method: "GET",
+                endpoint: "/api/progress/\(userId)/\(lessonId)"
+            )
+            return response.progress
+        } catch APIError.notFound {
+            return nil
+        }
+    }
+
+    /// Update lesson progress
+    func updateLessonProgress(
+        progressId: String,
+        completionPercentage: Int? = nil,
+        timeSpent: Int? = nil
+    ) async throws {
+        struct UpdateProgressRequest: Encodable {
+            let completionPercentage: Int?
+            let timeSpent: Int?
+        }
+
+        let request = UpdateProgressRequest(
+            completionPercentage: completionPercentage,
+            timeSpent: timeSpent
+        )
+
+        let _: [String: String] = try await self.request(
+            method: "PUT",
+            endpoint: "/api/progress/\(progressId)",
+            body: request
+        )
+    }
+
+    /// Toggle favorite status for a lesson
+    func updateLessonFavorite(lessonId: String, isFavorite: Bool) async throws {
+        struct FavoriteRequest: Encodable {
+            let userId: String
+            let lessonId: String
+            let isFavorite: Bool
+        }
+
+        guard let userId = try? keychainService.retrieve(key: "userId") ?? "" else {
+            throw APIError.unauthorized
+        }
+
+        let request = FavoriteRequest(userId: userId, lessonId: lessonId, isFavorite: isFavorite)
+
+        let _: [String: Any] = try await self.request(
+            method: "POST",
+            endpoint: "/api/favorites/toggle",
+            body: request
+        )
+    }
+
+    /// Get all favorite lessons for user
+    func getFavoriteLessons(userId: String) async throws -> [[String: Any]] {
+        struct FavoritesResponse: Decodable {
+            let success: Bool
+            let favorites: [[String: Any]]
+        }
+
+        let response: FavoritesResponse = try await request(
+            method: "GET",
+            endpoint: "/api/favorites/\(userId)"
+        )
+        return response.favorites
+    }
+
+    /// Check if a lesson is favorited
+    func isLessonFavorited(userId: String, lessonId: String) async throws -> Bool {
+        struct FavoriteCheckResponse: Decodable {
+            let success: Bool
+            let isFavorite: Bool
+        }
+
+        let response: FavoriteCheckResponse = try await request(
+            method: "GET",
+            endpoint: "/api/favorites/\(userId)/\(lessonId)"
+        )
+        return response.isFavorite
+    }
+
     // MARK: - Preferences Endpoints
 
     /// Get user preferences
