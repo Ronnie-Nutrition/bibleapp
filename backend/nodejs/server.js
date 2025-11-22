@@ -8,6 +8,9 @@ const { admin, db, auth, messaging } = require('./config/firebase');
 // Validation middleware
 const { validateRequest, validationErrorHandler } = require('./middleware/validation');
 
+// Rate limiting middleware
+const { rateLimit, rateLimits } = require('./middleware/rateLimiting');
+
 // Initialize Express app
 const app = express();
 
@@ -26,6 +29,7 @@ const authRouter = express.Router();
 const authService = require('./services/authenticationService');
 
 authRouter.post('/register',
+  rateLimits.register,
   validateRequest({
     required: ['email', 'password', 'displayName'],
     fields: {
@@ -51,6 +55,7 @@ authRouter.post('/register',
 );
 
 authRouter.post('/login',
+  rateLimits.login,
   validateRequest({
     required: ['email', 'password'],
     fields: {
@@ -74,6 +79,7 @@ authRouter.post('/login',
 );
 
 authRouter.post('/forgot-password',
+  rateLimits.passwordReset,
   validateRequest({
     required: ['email'],
     fields: {
