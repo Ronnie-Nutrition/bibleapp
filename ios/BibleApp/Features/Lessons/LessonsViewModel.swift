@@ -9,7 +9,7 @@ class LessonsViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var filter = LessonFilter()
-    @Published var userProgress: [UserProgress] = [:]
+    @Published var userProgress: [UserProgress] = []
 
     private let apiClient = APIClient.shared
 
@@ -132,19 +132,71 @@ class LessonsViewModel: ObservableObject {
     }
 
     func toggleFavorite(lessonId: String) async {
-        if let index = lessons.firstIndex(where: { $0.id == lessonId }) {
-            // Toggle favorite status
-            let isFavorite = isLessonFavorite(lessonId)
+        if let progressIndex = userProgress.firstIndex(where: { $0.lessonId == lessonId }) {
+            let currentProgress = userProgress[progressIndex]
+            let newFavoriteStatus = !currentProgress.isFavorite
 
-            // TODO: Call backend API to sync favorite status
-            // For now, update local progress state
-            if let progressIndex = userProgress.firstIndex(where: { $0.lessonId == lessonId }) {
-                // Create updated progress with toggled favorite
-                var updatedProgress = userProgress[progressIndex]
-                // Note: UserProgress is immutable, so we'd need to modify the model
-                // or create a wrapper for favorite management
-                applyFilter()
+            // Create new UserProgress with toggled favorite status
+            let updatedProgress = UserProgress(
+                id: currentProgress.id,
+                userId: currentProgress.userId,
+                lessonId: currentProgress.lessonId,
+                completedAt: currentProgress.completedAt,
+                lastViewedAt: currentProgress.lastViewedAt,
+                isFavorite: newFavoriteStatus,
+                timeSpent: currentProgress.timeSpent
+            )
+
+            // Replace the old progress with the updated one
+            userProgress[progressIndex] = updatedProgress
+
+            // Call backend API to sync favorite status
+            do {
+                try await apiClient.updateLessonFavorite(lessonId: lessonId, isFavorite: newFavoriteStatus)
+            } catch let error as APIError {
+                errorMessage = "Failed to update favorite: \(error.localizedDescription)"
+                // Revert the change if API call fails
+                let revertedProgress = UserProgress(
+                    id: currentProgress.id,
+                    userId: currentProgress.userId,
+                    lessonId: currentProgress.lessonId,
+                    completedAt: currentProgress.completedAt,
+                    lastViewedAt: currentProgress.lastViewedAt,
+                    isFavorite: currentProgress.isFavorite,
+                    timeSpent: currentProgress.timeSpent
+                )
+                userProgress[progressIndex] = revertedProgress
+            } catch {
+                errorMessage = "Failed to update favorite: \(error.localizedDescription)"
             }
+
+            applyFilter()
+        } else {
+            // If no progress exists, create a new one
+            let newProgress = UserProgress(
+                id: UUID().uuidString,
+                userId: "",
+                lessonId: lessonId,
+                completedAt: nil,
+                lastViewedAt: Date(),
+                isFavorite: true,
+                timeSpent: 0
+            )
+
+            userProgress.append(newProgress)
+
+            // Sync with backend
+            do {
+                try await apiClient.updateLessonFavorite(lessonId: lessonId, isFavorite: true)
+            } catch let error as APIError {
+                errorMessage = "Failed to update favorite: \(error.localizedDescription)"
+                // Remove the newly added progress if API call fails
+                userProgress.removeAll { $0.id == newProgress.id }
+            } catch {
+                errorMessage = "Failed to update favorite: \(error.localizedDescription)"
+            }
+
+            applyFilter()
         }
     }
 
