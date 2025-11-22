@@ -226,6 +226,300 @@ lessonsRouter.get('/category/:category', async (req, res) => {
 
 app.use('/api/lessons', lessonsRouter);
 
+// MARK: - Lesson Progress Routes
+const progressRouter = express.Router();
+
+/**
+ * POST /api/progress/save
+ * Save or update lesson progress
+ */
+progressRouter.post('/save', async (req, res) => {
+  try {
+    const { userId, lessonId, completedAt, timeSpent, completionPercentage } = req.body;
+
+    if (!userId || !lessonId) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, lessonId'
+      });
+    }
+
+    const progress = {
+      userId,
+      lessonId,
+      completedAt: completedAt || new Date().toISOString(),
+      timeSpent: timeSpent || 0,
+      completionPercentage: completionPercentage || 100,
+      lastUpdated: new Date().toISOString()
+    };
+
+    // Save to Firestore
+    const docRef = await db.collection('userProgress').add(progress);
+
+    res.json({
+      success: true,
+      progressId: docRef.id,
+      progress
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/progress/:userId
+ * Get all lesson progress for a user
+ */
+progressRouter.get('/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        error: 'User ID is required'
+      });
+    }
+
+    const snapshot = await db.collection('userProgress')
+      .where('userId', '==', userId)
+      .get();
+
+    const progress = [];
+    snapshot.forEach(doc => {
+      progress.push({ id: doc.id, ...doc.data() });
+    });
+
+    res.json({ success: true, progress });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/progress/:userId/:lessonId
+ * Get progress for a specific lesson
+ */
+progressRouter.get('/:userId/:lessonId', async (req, res) => {
+  try {
+    const { userId, lessonId } = req.params;
+
+    if (!userId || !lessonId) {
+      return res.status(400).json({
+        error: 'User ID and Lesson ID are required'
+      });
+    }
+
+    const snapshot = await db.collection('userProgress')
+      .where('userId', '==', userId)
+      .where('lessonId', '==', lessonId)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ error: 'Progress not found' });
+    }
+
+    const doc = snapshot.docs[0];
+    res.json({ success: true, progress: { id: doc.id, ...doc.data() } });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * PUT /api/progress/:progressId
+ * Update lesson progress
+ */
+progressRouter.put('/:progressId', async (req, res) => {
+  try {
+    const { progressId } = req.params;
+    const { timeSpent, completionPercentage, completedAt } = req.body;
+
+    if (!progressId) {
+      return res.status(400).json({
+        error: 'Progress ID is required'
+      });
+    }
+
+    const updateData = {
+      lastUpdated: new Date().toISOString()
+    };
+
+    if (timeSpent !== undefined) updateData.timeSpent = timeSpent;
+    if (completionPercentage !== undefined) updateData.completionPercentage = completionPercentage;
+    if (completedAt !== undefined) updateData.completedAt = completedAt;
+
+    await db.collection('userProgress').doc(progressId).update(updateData);
+
+    res.json({ success: true, message: 'Progress updated' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/progress/:progressId
+ * Delete lesson progress
+ */
+progressRouter.delete('/:progressId', async (req, res) => {
+  try {
+    const { progressId } = req.params;
+
+    if (!progressId) {
+      return res.status(400).json({
+        error: 'Progress ID is required'
+      });
+    }
+
+    await db.collection('userProgress').doc(progressId).delete();
+
+    res.json({ success: true, message: 'Progress deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.use('/api/progress', progressRouter);
+
+// MARK: - Favorites Routes
+const favoritesRouter = express.Router();
+
+/**
+ * POST /api/favorites/toggle
+ * Toggle a lesson as favorite
+ */
+favoritesRouter.post('/toggle', async (req, res) => {
+  try {
+    const { userId, lessonId, isFavorite } = req.body;
+
+    if (!userId || !lessonId) {
+      return res.status(400).json({
+        error: 'Missing required fields: userId, lessonId'
+      });
+    }
+
+    const favoriteData = {
+      userId,
+      lessonId,
+      isFavorite: isFavorite !== undefined ? isFavorite : true,
+      toggledAt: new Date().toISOString()
+    };
+
+    // Save or update in Firestore
+    const query = await db.collection('favorites')
+      .where('userId', '==', userId)
+      .where('lessonId', '==', lessonId)
+      .limit(1)
+      .get();
+
+    let favoriteId;
+    if (!query.empty) {
+      favoriteId = query.docs[0].id;
+      await db.collection('favorites').doc(favoriteId).update(favoriteData);
+    } else {
+      const docRef = await db.collection('favorites').add(favoriteData);
+      favoriteId = docRef.id;
+    }
+
+    res.json({
+      success: true,
+      favoriteId,
+      isFavorite: favoriteData.isFavorite
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/favorites/:userId
+ * Get all favorite lessons for a user
+ */
+favoritesRouter.get('/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        error: 'User ID is required'
+      });
+    }
+
+    const snapshot = await db.collection('favorites')
+      .where('userId', '==', userId)
+      .where('isFavorite', '==', true)
+      .get();
+
+    const favorites = [];
+    snapshot.forEach(doc => {
+      favorites.push({ id: doc.id, ...doc.data() });
+    });
+
+    res.json({ success: true, favorites });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/favorites/:userId/:lessonId
+ * Check if a lesson is favorited by user
+ */
+favoritesRouter.get('/:userId/:lessonId', async (req, res) => {
+  try {
+    const { userId, lessonId } = req.params;
+
+    if (!userId || !lessonId) {
+      return res.status(400).json({
+        error: 'User ID and Lesson ID are required'
+      });
+    }
+
+    const snapshot = await db.collection('favorites')
+      .where('userId', '==', userId)
+      .where('lessonId', '==', lessonId)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.json({ success: true, isFavorite: false });
+    }
+
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+    res.json({
+      success: true,
+      isFavorite: data.isFavorite,
+      favoriteId: doc.id
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * DELETE /api/favorites/:favoriteId
+ * Remove a lesson from favorites
+ */
+favoritesRouter.delete('/:favoriteId', async (req, res) => {
+  try {
+    const { favoriteId } = req.params;
+
+    if (!favoriteId) {
+      return res.status(400).json({
+        error: 'Favorite ID is required'
+      });
+    }
+
+    await db.collection('favorites').doc(favoriteId).delete();
+
+    res.json({ success: true, message: 'Lesson removed from favorites' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.use('/api/favorites', favoritesRouter);
+
 // MARK: - Push Notifications Routes
 const notificationService = require('./services/notificationService');
 const notificationsRouter = express.Router();
