@@ -9,6 +9,11 @@ class PushNotificationManager: NSObject, ObservableObject {
     @Published var lastNotification: [String: Any]?
     @Published var isNotificationPermissionGranted = false
     @Published var fcmToken: String?
+    @Published var selectedLessonId: String?
+    @Published var showWelcomeScreen = false
+    @Published var announcementMessage: String?
+    @Published var showToast = false
+    @Published var toastMessage: String?
 
     private let apiClient = APIClient.shared
     private var notificationHistory: [[String: Any]] = []
@@ -116,8 +121,8 @@ class PushNotificationManager: NSObject, ObservableObject {
     func handleLessonNotification(_ lessonId: String) {
         print("📖 Handling lesson notification: \(lessonId)")
 
-        // TODO: Navigate to lesson detail view
-        // This would typically be done by updating a navigation state
+        // Navigate to lesson detail view by setting selectedLessonId
+        selectedLessonId = lessonId
 
         logNotificationAction(type: "lesson", lessonId: lessonId)
     }
@@ -145,7 +150,8 @@ class PushNotificationManager: NSObject, ObservableObject {
 
     private func handleWelcomeNotification() {
         print("👋 Welcome notification handled")
-        // TODO: Show welcome screen or toast
+        showWelcomeScreen = true
+        showToastMessage("Welcome to BibleApp! Explore biblical lessons for entrepreneurs.")
     }
 
     private func handleDailyLessonNotification(data: [String: Any]) {
@@ -157,7 +163,10 @@ class PushNotificationManager: NSObject, ObservableObject {
 
     private func handleAnnouncementNotification(data: [String: Any]) {
         print("📣 Announcement notification handled")
-        // TODO: Show announcement banner or modal
+        if let message = data["message"] as? String {
+            announcementMessage = message
+            showToastMessage(message)
+        }
     }
 
     private func handleReminderNotification(data: [String: Any]) {
@@ -243,6 +252,18 @@ class PushNotificationManager: NSObject, ObservableObject {
         await subscribeToTopic("lessons")
         await subscribeToTopic("announcements")
         print("✓ Subscribed to default topics")
+    }
+
+    // MARK: - Toast Notifications
+
+    private func showToastMessage(_ message: String) {
+        toastMessage = message
+        showToast = true
+
+        // Auto-dismiss after 3 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            self.showToast = false
+        }
     }
 }
 
