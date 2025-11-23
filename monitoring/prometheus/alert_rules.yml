@@ -1,0 +1,56 @@
+groups:
+  - name: bible-app-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(django_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Django error rate is {{ $value }} errors per second"
+
+      - alert: HighResponseTime
+        expr: django_request_duration_seconds > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "Django response time is {{ $value }} seconds"
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.instance }} has been down for more than 1 minute"
+
+      - alert: HighMemoryUsage
+        expr: (nodejs_memory_usage{type="heap_used"} / nodejs_memory_usage{type="heap_total"}) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Node.js memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: DatabaseConnectionIssues
+        expr: django_database_queries_total{status="error"} > 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection issues"
+          description: "Multiple database connection errors detected"
+
+      - alert: LowCacheHitRatio
+        expr: (rate(django_cache_hits_total[5m]) / (rate(django_cache_hits_total[5m]) + rate(django_cache_misses_total[5m]))) < 0.7
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low cache hit ratio"
+          description: "Cache hit ratio is {{ $value | humanizePercentage }}"

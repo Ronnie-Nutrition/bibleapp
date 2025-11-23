@@ -2,6 +2,12 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+// Import structured logging
+const { logger, requestLogger, logError } = require('./utils/logger');
+
+// Import metrics collection
+const { metricsCollector, metricsMiddleware } = require('./utils/metrics');
+
 // Initialize Firebase Admin SDK
 const { admin, db, auth, messaging } = require('./config/firebase');
 
@@ -13,9 +19,118 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Add request logging middleware
+app.use(requestLogger);
+
+// Add metrics collection middleware
+app.use(metricsMiddleware);
+
 // MARK: - Health Check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/health', async (req, res) => {
+  try {
+    // Basic health check
+    const health = {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'nodejs-backend',
+      version: process.env.npm_package_version || '1.0.0',
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development'
+    };
+
+    // Check Firebase connection
+    try {
+      await admin.auth().listUsers(1);
+      health.firebase = 'connected';
+    } catch (err) {
+      health.firebase = 'disconnected';
+      health.status = 'degraded';
+    }
+
+    const status = health.status === 'ok' ? 200 : 503;
+    res.status(status).json(health);
+  } catch (error) {
+    res.status(503).json({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      service: 'nodejs-backend',
+      error: error.message
+    });
+  }
+});
+
+// Detailed health check
+app.get('/health/detailed', async (req, res) => {
+  try {
+    const detailed = {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'nodejs-backend',
+      version: process.env.npm_package_version || '1.0.0',
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development',
+      memory: process.memoryUsage(),
+      checks: {}
+    };
+
+    // Check Firebase connection
+    try {
+      await admin.auth().listUsers(1);
+      detailed.checks.firebase = { status: 'ok', message: 'Connected' };
+    } catch (err) {
+      detailed.checks.firebase = { status: 'error', message: err.message };
+      detailed.status = 'degraded';
+    }
+
+    // Check Firebase Firestore
+    try {
+      await db.collection('_health').limit(1).get();
+      detailed.checks.firestore = { status: 'ok', message: 'Connected' };
+    } catch (err) {
+      detailed.checks.firestore = { status: 'error', message: err.message };
+      detailed.status = 'degraded';
+    }
+
+    const status = detailed.status === 'ok' ? 200 : 503;
+    res.status(status).json(detailed);
+  } catch (error) {
+    res.status(503).json({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      service: 'nodejs-backend',
+      error: error.message
+    });
+  }
+});
+
+// MARK: - Metrics Endpoints
+app.get('/metrics', (req, res) => {
+  try {
+    const prometheusMetrics = metricsCollector.getPrometheusMetrics();
+    res.set('Content-Type', 'text/plain');
+    res.send(prometheusMetrics);
+  } catch (error) {
+    logger.error('Metrics endpoint error', { metadata: { error: error.message } });
+    res.status(500).json({
+      error: 'Failed to generate metrics',
+      timestamp: new Date().toISOString(),
+      service: 'nodejs-backend'
+    });
+  }
+});
+
+app.get('/metrics/application', (req, res) => {
+  try {
+    const metrics = metricsCollector.getMetrics();
+    res.json(metrics);
+  } catch (error) {
+    logger.error('Application metrics endpoint error', { metadata: { error: error.message } });
+    res.status(500).json({
+      error: 'Failed to generate application metrics',
+      timestamp: new Date().toISOString(),
+      service: 'nodejs-backend'
+    });
+  }
 });
 
 // MARK: - Authentication Routes
@@ -652,18 +767,61 @@ app.use('/api/preferences', preferencesRouter);
 
 // MARK: - Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal Server Error' });
+  logError(err, req, { middleware: 'global_error_handler' });
+  
+  // Don't expose internal error details in production
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const errorResponse = {
+    error: 'Internal Server Error',
+    ...(isDevelopment && { message: err.message, stack: err.stack })
+  };
+  
+  res.status(err.status || 500).json(errorResponse);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception', { 
+    metadata: { 
+      error: error.message, 
+      stack: error.stack,
+      type: 'uncaughtException'
+    } 
+  });
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Promise Rejection', { 
+    metadata: { 
+      reason: reason?.message || reason, 
+      stack: reason?.stack,
+      type: 'unhandledRejection'
+    } 
+  });
+  process.exit(1);
 });
 
 // MARK: - Start Server and Schedulers
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Bible App Backend running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`Bible App Backend started`, {
+    metadata: {
+      port: PORT,
+      environment: process.env.NODE_ENV || 'development',
+      nodeVersion: process.version,
+      pid: process.pid
+    }
+  });
 
   // Start schedulers
-  schedulerService.startDailyLessonScheduler();
+  try {
+    schedulerService.startDailyLessonScheduler();
+    logger.info('Daily lesson scheduler started');
+  } catch (error) {
+    logError(error, null, { component: 'scheduler_startup' });
+  }
 
   // Optionally start personalized schedulers (requires more resources)
   // Uncomment to enable personalized notification times

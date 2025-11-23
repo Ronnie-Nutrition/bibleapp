@@ -35,7 +35,8 @@ COPY . .
 RUN mkdir -p logs staticfiles media && \
     chown -R django:django /app
 
-# Collect static files
+# Collect static files with dummy environment variables
+ENV SECRET_KEY="dummy-secret-key-for-collectstatic"
 RUN python manage.py collectstatic --noinput
 
 # Switch to non-root user

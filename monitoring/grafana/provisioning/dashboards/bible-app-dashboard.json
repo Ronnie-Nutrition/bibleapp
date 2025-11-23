@@ -1,0 +1,239 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Bible App Production Dashboard",
+    "tags": ["bible-app", "production"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "schemaVersion": 36,
+    "version": 1,
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Overview",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "up",
+            "refId": "A",
+            "legendFormat": "Services Up"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 0.8},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(django_requests_total[5m])",
+            "refId": "A",
+            "legendFormat": "Django RPS"
+          },
+          {
+            "expr": "rate(nodejs_requests_total[5m])",
+            "refId": "B",
+            "legendFormat": "Node.js RPS"
+          }
+        ],
+        "yAxes": [
+          {"label": "Requests per second", "min": 0},
+          {"show": false}
+        ],
+        "xAxis": {"show": true},
+        "legend": {"show": true},
+        "tooltip": {"shared": true}
+      },
+      {
+        "id": 3,
+        "title": "Response Time",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "django_request_duration_seconds",
+            "refId": "A",
+            "legendFormat": "Django Response Time"
+          },
+          {
+            "expr": "nodejs_response_time_avg / 1000",
+            "refId": "B",
+            "legendFormat": "Node.js Response Time"
+          }
+        ],
+        "yAxes": [
+          {"label": "Seconds", "min": 0},
+          {"show": false}
+        ],
+        "xAxis": {"show": true},
+        "legend": {"show": true},
+        "tooltip": {"shared": true}
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(django_requests_total{status=~\"4..|5..\"}[5m])",
+            "refId": "A",
+            "legendFormat": "Django Errors"
+          },
+          {
+            "expr": "rate(nodejs_requests_errors_total[5m])",
+            "refId": "B",
+            "legendFormat": "Node.js Errors"
+          }
+        ],
+        "yAxes": [
+          {"label": "Errors per second", "min": 0},
+          {"show": false}
+        ],
+        "xAxis": {"show": true},
+        "legend": {"show": true},
+        "tooltip": {"shared": true}
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "django_memory_usage",
+            "refId": "A",
+            "legendFormat": "Django Memory"
+          },
+          {
+            "expr": "nodejs_memory_usage",
+            "refId": "B",
+            "legendFormat": "Node.js Memory"
+          }
+        ],
+        "yAxes": [
+          {"label": "Bytes", "min": 0},
+          {"show": false}
+        ],
+        "xAxis": {"show": true},
+        "legend": {"show": true},
+        "tooltip": {"shared": true}
+      },
+      {
+        "id": 6,
+        "title": "Database Metrics",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "django_database_queries_total",
+            "refId": "A",
+            "legendFormat": "Database Queries"
+          },
+          {
+            "expr": "django_cache_hits_total",
+            "refId": "B",
+            "legendFormat": "Cache Hits"
+          },
+          {
+            "expr": "django_cache_misses_total",
+            "refId": "C",
+            "legendFormat": "Cache Misses"
+          }
+        ],
+        "yAxes": [
+          {"label": "Count", "min": 0},
+          {"show": false}
+        ],
+        "xAxis": {"show": true},
+        "legend": {"show": true},
+        "tooltip": {"shared": true}
+      },
+      {
+        "id": 7,
+        "title": "Business Metrics",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 28},
+        "targets": [
+          {
+            "expr": "django_active_users",
+            "refId": "A",
+            "legendFormat": "Active Users"
+          },
+          {
+            "expr": "django_total_lessons",
+            "refId": "B",
+            "legendFormat": "Total Lessons"
+          },
+          {
+            "expr": "django_completed_lessons",
+            "refId": "C",
+            "legendFormat": "Completed Lessons"
+          },
+          {
+            "expr": "nodejs_notifications_total",
+            "refId": "D",
+            "legendFormat": "Notifications Sent"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        }
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "links": []
+  }
+}

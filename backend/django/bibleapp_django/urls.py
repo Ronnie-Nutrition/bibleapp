@@ -9,6 +9,8 @@ from rest_framework.routers import DefaultRouter
 from apps.auth_app.views import AuthViewSet, UserViewSet
 from apps.lessons.views import LessonViewSet, UserProgressViewSet
 from apps.preferences.views import PreferencesViewSet
+from apps.core.health import health_check, detailed_health_check
+from apps.core.metrics import metrics_endpoint, application_metrics
 
 # Initialize router
 router = DefaultRouter()
@@ -21,10 +23,13 @@ urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
 
-    # Health check
-    path('health/', lambda request: __import__('rest_framework.response', fromlist=['Response']).Response(
-        {'status': 'ok', 'timestamp': __import__('django.utils.timezone', fromlist=['now']).now()}
-    ), name='health'),
+    # Health check endpoints
+    path('health/', health_check, name='health'),
+    path('health/detailed/', detailed_health_check, name='health-detailed'),
+    
+    # Metrics endpoints
+    path('metrics/', metrics_endpoint, name='metrics'),
+    path('metrics/application/', application_metrics, name='application-metrics'),
 
     # API v1
     path('api/v1/', include(router.urls)),

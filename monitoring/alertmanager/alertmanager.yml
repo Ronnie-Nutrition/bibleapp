@@ -1,0 +1,31 @@
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@bibleapp.com'
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'bible-app-alerts'
+
+receivers:
+  - name: 'bible-app-alerts'
+    email_configs:
+      - to: 'admin@bibleapp.com'
+        subject: 'Bible App Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          {{ end }}
+    webhook_configs:
+      - url: 'http://nodejs:3001/api/alerts/webhook'
+        send_resolved: true
+
+inhibit_rules:
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity = "warning"
+    equal: ['alertname', 'instance']
