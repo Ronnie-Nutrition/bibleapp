@@ -109,10 +109,16 @@ class LessonsViewModel: ObservableObject {
     }
 
     func completeLessonProgress(lessonId: String) async {
+        let authManager = AuthenticationManager.shared
+        guard let userId = authManager.currentUser?.id else {
+            errorMessage = "User not authenticated"
+            return
+        }
+
         do {
             let progress = UserProgress(
                 id: UUID().uuidString,
-                userId: "",
+                userId: userId,
                 lessonId: lessonId,
                 completedAt: Date(),
                 lastViewedAt: Date(),

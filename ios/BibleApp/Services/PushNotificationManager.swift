@@ -171,26 +171,9 @@ class PushNotificationManager: NSObject, ObservableObject {
 
     private func logNotificationAction(type: String, lessonId: String = "") {
         // Log to backend for analytics
-        Task {
-            do {
-                let networkService = NetworkService()
-                let body: [String: Any] = [
-                    "action": "notification_interaction",
-                    "type": type,
-                    "lessonId": lessonId,
-                    "timestamp": ISO8601DateFormatter().string(from: Date())
-                ]
-
-                let _ = try await networkService.request(
-                    endpoint: "/api/analytics/log",
-                    method: "POST",
-                    body: body
-                )
-            } catch {
-                // Silently fail - don't interrupt user experience
-                print("⚠️  Failed to log notification action: \(error.localizedDescription)")
-            }
-        }
+        // Note: Analytics endpoint not yet implemented in backend
+        // TODO: Implement /api/analytics/log endpoint on backend
+        print("📊 Notification action: \(type) - lessonId: \(lessonId)")
     }
 
     // MARK: - Notification History
