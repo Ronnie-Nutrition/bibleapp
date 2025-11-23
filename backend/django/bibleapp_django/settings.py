@@ -78,6 +78,13 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD', default='postgres'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
+        'OPTIONS': {
+            'MAX_CONNS': 20,
+            'OPTIONS': {
+                'MAX_CONNS': 20,
+            }
+        },
+        'CONN_MAX_AGE': 600,  # 10 minutes
     }
 }
 
@@ -113,10 +120,39 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# Static files with CDN support
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Use CDN for static files in production
+USE_S3_STATIC = config('USE_S3_STATIC', default=False, cast=bool)
+if USE_S3_STATIC:
+    # AWS S3 Configuration
+    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
+    AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default=None)
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',  # 1 day
+    }
+    
+    # Use S3 for static files
+    STATICFILES_STORAGE = 'apps.core.storage.StaticStorage'
+    DEFAULT_FILE_STORAGE = 'apps.core.storage.MediaStorage'
+    
+    # CloudFront CDN
+    AWS_CLOUDFRONT_DISTRIBUTION_ID = config('AWS_CLOUDFRONT_DISTRIBUTION_ID', default=None)
+    CDN_DOMAIN = config('CDN_DOMAIN', default=None)
+else:
+    # Use optimized local storage
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Static file optimization
+ENABLE_STATIC_HASHING = config('ENABLE_STATIC_HASHING', default=True, cast=bool)
+ENABLE_STATIC_COMPRESSION = config('ENABLE_STATIC_COMPRESSION', default=True, cast=bool)
+ENABLE_FILE_COMPRESSION = config('ENABLE_FILE_COMPRESSION', default=True, cast=bool)
 
 # Media files
 MEDIA_URL = '/media/'
@@ -265,13 +301,36 @@ if not DEBUG:
     X_FRAME_OPTIONS = 'DENY'
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# Cache configuration (optional)
+# Cache configuration with Redis
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': config('REDIS_URL', default='redis://localhost:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 50,
+                'retry_on_timeout': True,
+                'socket_timeout': 5,
+                'socket_connect_timeout': 5,
+            },
+            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+        },
+        'KEY_PREFIX': 'bibleapp',
+        'TIMEOUT': 300,  # 5 minutes default
+        'VERSION': 1,
     }
 }
+
+# Cache settings
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 300
+CACHE_MIDDLEWARE_KEY_PREFIX = 'bibleapp'
+
+# Session storage in Redis
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 # Rate limiting
 RATELIMIT_ENABLE = config('RATELIMIT_ENABLE', default=True, cast=bool)
