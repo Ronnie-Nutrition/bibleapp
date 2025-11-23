@@ -5,6 +5,10 @@ Django Settings for Biblical Lessons API
 import os
 from pathlib import Path
 from decouple import config
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -334,3 +338,37 @@ SESSION_CACHE_ALIAS = 'default'
 
 # Rate limiting
 RATELIMIT_ENABLE = config('RATELIMIT_ENABLE', default=True, cast=bool)
+
+# Sentry Configuration
+SENTRY_DSN = config('SENTRY_DSN', default=None)
+SENTRY_ENVIRONMENT = config('SENTRY_ENVIRONMENT', default=config('ENVIRONMENT', default='development'))
+
+if SENTRY_DSN:
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,        # Capture info and above as breadcrumbs
+        event_level=logging.ERROR  # Send errors as events
+    )
+    
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(transaction_style='url'),
+            RedisIntegration(),
+            sentry_logging,
+        ],
+        environment=SENTRY_ENVIRONMENT,
+        
+        # Performance Monitoring
+        traces_sample_rate=0.1 if SENTRY_ENVIRONMENT == 'production' else 1.0,
+        
+        # Error Filtering
+        before_send=lambda event, hint: event if not DEBUG else None,
+        
+        # Release Tracking
+        release=config('APP_VERSION', default='unknown'),
+        
+        # Additional Options
+        send_default_pii=False,  # Don't send personally identifiable information
+        max_breadcrumbs=50,
+        attach_stacktrace=True,
+    )
