@@ -15,8 +15,27 @@ if (admin.apps.length === 0) {
   const nodeEnv = process.env.NODE_ENV || 'development';
 
   try {
-    // In production, use environment variables
-    if (nodeEnv === 'production') {
+    // Try to load from JSON file first (works for both dev and production)
+    const keyPath = path.join(__dirname, 'firebase-key.json');
+    
+    console.log(`🔍 Looking for Firebase credentials at: ${keyPath}`);
+    console.log(`🔍 File exists: ${fs.existsSync(keyPath)}`);
+    console.log(`🔍 Environment: ${nodeEnv}`);
+    
+    if (fs.existsSync(keyPath)) {
+      console.log('📂 Loading Firebase credentials from JSON file');
+      const serviceAccount = require(keyPath);
+
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.FIREBASE_DATABASE_URL ||
+          `https://${serviceAccount.project_id}.firebaseio.com`
+      });
+
+      console.log('✓ Firebase initialized with service account JSON');
+    } else if (nodeEnv === 'production' && process.env.FIREBASE_PROJECT_ID) {
+      console.log('🔧 Using environment variables for Firebase credentials');
+      // Fallback to environment variables for production
       const serviceAccount = {
         type: 'service_account',
         project_id: process.env.FIREBASE_PROJECT_ID,
@@ -34,29 +53,16 @@ if (admin.apps.length === 0) {
         credential: admin.credential.cert(serviceAccount),
         databaseURL: process.env.FIREBASE_DATABASE_URL
       });
+
+      console.log('✓ Firebase initialized with environment variables');
     } else {
-      // In development, try to load from file
-      const keyPath = path.join(__dirname, 'firebase-key.json');
-
-      if (!fs.existsSync(keyPath)) {
-        console.warn('⚠️  Warning: firebase-key.json not found');
-        console.warn('   To use Firebase services, add your service account JSON to:');
-        console.warn(`   ${keyPath}`);
-        console.warn('\n   Or set environment variables:');
-        console.warn('   - FIREBASE_PROJECT_ID');
-        console.warn('   - FIREBASE_PRIVATE_KEY');
-        console.warn('   - FIREBASE_CLIENT_EMAIL\n');
-      } else {
-        const serviceAccount = require(keyPath);
-
-        admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount),
-          databaseURL: process.env.FIREBASE_DATABASE_URL ||
-            `https://${serviceAccount.project_id}.firebaseio.com`
-        });
-
-        console.log('✓ Firebase initialized with service account');
-      }
+      console.warn('⚠️  Warning: Firebase credentials not found');
+      console.warn('   To use Firebase services, add your service account JSON to:');
+      console.warn(`   ${path.join(__dirname, 'firebase-key.json')}`);
+      console.warn('\n   Or set environment variables:');
+      console.warn('   - FIREBASE_PROJECT_ID');
+      console.warn('   - FIREBASE_PRIVATE_KEY');
+      console.warn('   - FIREBASE_CLIENT_EMAIL\n');
     }
   } catch (error) {
     console.error('❌ Error initializing Firebase:', error.message);

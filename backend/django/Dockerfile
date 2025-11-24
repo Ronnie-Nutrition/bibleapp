@@ -18,6 +18,7 @@ RUN apk update && apk add --no-cache \
     libffi-dev \
     jpeg-dev \
     zlib-dev \
+    su-exec \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user for security
@@ -31,16 +32,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Create necessary directories
+# Create necessary directories with proper permissions
 RUN mkdir -p logs staticfiles media && \
+    chmod 755 logs staticfiles media && \
     chown -R django:django /app
+
+# Create entrypoint script to fix permissions (as root)
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Collect static files with dummy environment variables
 ENV SECRET_KEY="dummy-secret-key-for-collectstatic"
 RUN python manage.py collectstatic --noinput
-
-# Switch to non-root user
-USER django
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
@@ -49,5 +52,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Start the application
+# Start the application (will switch to django user in entrypoint)
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "60", "--keep-alive", "2", "bibleapp_django.wsgi:application"]

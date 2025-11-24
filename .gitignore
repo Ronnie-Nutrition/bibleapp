@@ -122,3 +122,4 @@ build/
 *.backup
 *.bak
 *.sql
+volumes/

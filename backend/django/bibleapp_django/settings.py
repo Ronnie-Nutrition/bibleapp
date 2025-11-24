@@ -222,6 +222,7 @@ FIREBASE_CONFIG = {
 }
 
 # Logging Configuration
+import logging
 import structlog
 
 # Configure structlog for structured logging
@@ -272,66 +273,90 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'json' if not DEBUG else 'simple',
         },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 5,
-            'formatter': 'json' if not DEBUG else 'verbose',
-        },
-        'error_file': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'django_error.log'),
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 10,
-            'formatter': 'json',
-        },
-        'security_file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'security.log'),
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 20,
-            'formatter': 'json',
-        },
+        # File handlers are added conditionally below based on Docker environment
     },
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': ['console'],  # Default to console only, file handlers added conditionally
         'level': 'INFO',
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],  # Default to console only, file handlers added conditionally
             'level': 'INFO',
             'propagate': False,
         },
         'django.security': {
-            'handlers': ['security_file', 'error_file'],
+            'handlers': ['console'],  # Default to console only, file handlers added conditionally
             'level': 'INFO',
             'propagate': False,
         },
         'apps': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],  # Default to console only, file handlers added conditionally
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
         'apps.auth_app': {
-            'handlers': ['console', 'file', 'security_file'],
+            'handlers': ['console'],  # Default to console only, file handlers added conditionally
             'level': 'INFO',
             'propagate': False,
         },
         'performance': {
-            'handlers': ['file'],
+            'handlers': ['console'],  # Default to console only, file handlers added conditionally
             'level': 'INFO',
             'propagate': False,
         },
     },
 }
 
-# Create logs directory if it doesn't exist
-os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+# Check if running in Docker
+RUNNING_IN_DOCKER = os.path.exists('/.dockerenv')
+
+# Conditionally add file handlers only when not in Docker
+if not RUNNING_IN_DOCKER:
+    # Create logs directory if it doesn't exist (only when using file logging)
+    os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+    
+    # Add file handlers to the logging configuration
+    LOGGING['handlers']['file'] = {
+        'level': 'INFO',
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+        'maxBytes': 1024 * 1024 * 10,  # 10 MB
+        'backupCount': 5,
+        'formatter': 'json' if not DEBUG else 'verbose',
+    }
+    LOGGING['handlers']['error_file'] = {
+        'level': 'ERROR',
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': os.path.join(BASE_DIR, 'logs', 'django_error.log'),
+        'maxBytes': 1024 * 1024 * 10,  # 10 MB
+        'backupCount': 10,
+        'formatter': 'json',
+    }
+    LOGGING['handlers']['security_file'] = {
+        'level': 'INFO',
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': os.path.join(BASE_DIR, 'logs', 'security.log'),
+        'maxBytes': 1024 * 1024 * 5,  # 5 MB
+        'backupCount': 20,
+        'formatter': 'json',
+    }
+    
+    # Configure loggers to use both console and file handlers
+    LOGGING['loggers']['django']['handlers'] = ['console', 'file']
+    LOGGING['loggers']['django.security']['handlers'] = ['security_file', 'error_file']
+    LOGGING['loggers']['apps']['handlers'] = ['console', 'file']
+    LOGGING['loggers']['apps.auth_app']['handlers'] = ['console', 'file', 'security_file']
+    LOGGING['loggers']['performance']['handlers'] = ['file']
+    LOGGING['root']['handlers'] = ['console', 'file']
+else:
+    # In Docker, use only console logging for aggregation
+    LOGGING['loggers']['django']['handlers'] = ['console']
+    LOGGING['loggers']['django.security']['handlers'] = ['console']
+    LOGGING['loggers']['apps']['handlers'] = ['console']
+    LOGGING['loggers']['apps.auth_app']['handlers'] = ['console']
+    LOGGING['loggers']['performance']['handlers'] = ['console']
+    LOGGING['root']['handlers'] = ['console']
 
 # Security settings for production
 if not DEBUG:
