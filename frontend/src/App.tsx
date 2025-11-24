@@ -7,6 +7,9 @@ import AuthWrapper from './components/auth/AuthWrapper';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LessonList from './components/lessons/LessonList';
 import LessonDetail from './components/lessons/LessonDetail';
+import MainLayout from './components/layout/MainLayout';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import iOSTheme from './theme/theme';
 import './App.css';
 
@@ -49,7 +52,9 @@ function App() {
               path="/home" 
               element={
                 <ProtectedRoute>
-                  <LessonList />
+                  <MainLayout>
+                    <LessonList />
+                  </MainLayout>
                 </ProtectedRoute>
               } 
             />
@@ -58,6 +63,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <LessonDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
                 </ProtectedRoute>
               } 
             />

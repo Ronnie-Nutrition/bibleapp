@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, CircularProgress, Alert, Grid } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import LessonCard from './LessonCard';
 import CategoryFilter from './CategoryFilter';
 import SearchBar from './SearchBar';
@@ -164,17 +164,26 @@ const LessonList: React.FC = () => {
             </Typography>
           </Box>
         ) : (
-          <Grid container spacing={2}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+              },
+              gap: 2,
+            }}
+          >
             {filteredLessons.map((lesson) => (
-              <Grid item xs={12} sm={6} md={4} key={lesson.id}>
-                <LessonCard
-                  lesson={lesson}
-                  isCompleted={isLessonCompleted(lesson.id)}
-                  onClick={() => handleLessonClick(lesson.id)}
-                />
-              </Grid>
+              <LessonCard
+                key={lesson.id}
+                lesson={lesson}
+                isCompleted={isLessonCompleted(lesson.id)}
+                onClick={() => handleLessonClick(lesson.id)}
+              />
             ))}
-          </Grid>
+          </Box>
         )}
       </Box>
     </Box>

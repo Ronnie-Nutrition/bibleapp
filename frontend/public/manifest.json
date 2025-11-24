@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Bible Business",
+  "name": "Bible Business Lessons",
+  "description": "Learn business principles through biblical wisdom",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,45 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "apple-touch-icon"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#007AFF",
+  "background_color": "#FFFFFF",
+  "categories": ["education", "business"],
+  "shortcuts": [
+    {
+      "name": "View Lessons",
+      "short_name": "Lessons",
+      "description": "Browse all biblical business lessons",
+      "url": "/home",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Profile",
+      "short_name": "Profile",
+      "description": "View your progress",
+      "url": "/profile",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
 }

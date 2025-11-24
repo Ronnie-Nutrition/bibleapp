@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Chip, ScrollContainer } from '@mui/material';
+import { Box, Chip } from '@mui/material';
 import iOSTheme from '../../theme/theme';
 import { Category } from '../../types/lesson.types';
 
