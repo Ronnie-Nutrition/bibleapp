@@ -18,7 +18,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      backgroundColor: iOSTheme.colors.background,
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
       display: 'flex',
       flexDirection: 'column',
     }}>

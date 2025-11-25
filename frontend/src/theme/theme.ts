@@ -143,6 +143,59 @@ export const shadows = {
   medium: '0 4px 6px rgba(0, 0, 0, 0.15)',
   large: '0 10px 25px rgba(0, 0, 0, 0.15)',
   card: '0 2px 10px rgba(0, 0, 0, 0.1)',
+  liquidGlass: '0 8px 32px rgba(0, 0, 0, 0.12)',
+};
+
+// Liquid Glass Effects
+export const liquidGlass = {
+  // Standard glass effect for cards and backgrounds
+  standard: {
+    backdropFilter: 'blur(20px) saturate(180%)',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+    border: '1px solid rgba(255, 255, 255, 0.18)',
+    borderRadius: borderRadius.large,
+    boxShadow: shadows.liquidGlass,
+  },
+  // Subtle glass for navigation and overlays
+  subtle: {
+    backdropFilter: 'blur(12px) saturate(160%)',
+    backgroundColor: 'rgba(255, 255, 255, 0.82)',
+    border: '1px solid rgba(255, 255, 255, 0.28)',
+    borderRadius: borderRadius.medium,
+    boxShadow: shadows.medium,
+  },
+  // Strong glass for modals and emphasis
+  strong: {
+    backdropFilter: 'blur(30px) saturate(200%)',
+    backgroundColor: 'rgba(255, 255, 255, 0.62)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    borderRadius: borderRadius.xlarge,
+    boxShadow: shadows.large,
+  },
+  // Dark mode variants
+  dark: {
+    standard: {
+      backdropFilter: 'blur(20px) saturate(180%)',
+      backgroundColor: 'rgba(16, 16, 18, 0.72)',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+      borderRadius: borderRadius.large,
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.24)',
+    },
+    subtle: {
+      backdropFilter: 'blur(12px) saturate(160%)',
+      backgroundColor: 'rgba(16, 16, 18, 0.82)',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
+      borderRadius: borderRadius.medium,
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.18)',
+    },
+    strong: {
+      backdropFilter: 'blur(30px) saturate(200%)',
+      backgroundColor: 'rgba(16, 16, 18, 0.62)',
+      border: '1px solid rgba(255, 255, 255, 0.06)',
+      borderRadius: borderRadius.xlarge,
+      boxShadow: '0 16px 48px rgba(0, 0, 0, 0.32)',
+    },
+  },
 };
 
 // iOS Component Sizes
@@ -169,6 +222,7 @@ export const iOSTheme = {
   spacing,
   borderRadius,
   shadows,
+  liquidGlass,
   sizes,
   animation,
 };

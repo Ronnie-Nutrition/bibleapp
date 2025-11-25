@@ -22,6 +22,7 @@ const TopNavBar: React.FC<TopNavBarProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
 
+
   // Hide nav bar on certain pages
   const hideOnPaths = ['/auth', '/lesson/'];
   const shouldHide = hideOnPaths.some(path => location.pathname.includes(path));
@@ -51,10 +52,11 @@ const TopNavBar: React.FC<TopNavBarProps> = ({
         left: 0,
         right: 0,
         height: iOSTheme.sizes.navigationBarHeight,
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        borderBottom: `1px solid ${iOSTheme.colors.borderLight}`,
+        backgroundColor: 'rgba(255, 255, 255, 0.82)',
+        backdropFilter: 'blur(12px) saturate(160%)',
+        border: '1px solid rgba(255, 255, 255, 0.28)',
+        borderRadius: iOSTheme.borderRadius.medium,
+        boxShadow: iOSTheme.shadows.medium,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',

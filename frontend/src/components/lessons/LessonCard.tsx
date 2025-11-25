@@ -21,12 +21,13 @@ const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCompleted = false, on
     <Card
       onClick={onClick}
       sx={{
-        backgroundColor: isCompleted ? iOSTheme.colors.systemGray6 : 'white',
+        backgroundColor: isCompleted ? 'rgba(245, 245, 247, 0.75)' : 'rgba(255, 255, 255, 0.72)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        border: '1px solid rgba(255, 255, 255, 0.18)',
         borderRadius: iOSTheme.borderRadius.large,
-        boxShadow: iOSTheme.shadows.card,
+        boxShadow: iOSTheme.shadows.liquidGlass,
         cursor: 'pointer',
         transition: `all ${iOSTheme.animation.fast}`,
-        border: `1px solid ${iOSTheme.colors.borderLight}`,
         '&:hover': {
           transform: 'translateY(-2px)',
           boxShadow: iOSTheme.shadows.medium,
@@ -37,12 +38,7 @@ const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCompleted = false, on
         },
       }}
     >
-      <CardContent
-        sx={{
-          padding: iOSTheme.spacing.lg,
-          '&:last-child': { paddingBottom: iOSTheme.spacing.lg },
-        }}
-      >
+      <Box sx={{ padding: iOSTheme.spacing.lg }}>
         {/* Category & Completion Status */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography
@@ -136,7 +132,7 @@ const LessonCard: React.FC<LessonCardProps> = ({ lesson, isCompleted = false, on
             </Typography>
           </Box>
         </Box>
-      </CardContent>
+      </Box>
     </Card>
   );
 };
