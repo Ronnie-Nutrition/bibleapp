@@ -111,26 +111,36 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
     func fetchLessons(limit: Int = 20) async throws -> [Lesson] {
         let snapshot = try await db.collection("lessons")
             .limit(to: limit)
-            .order(by: "createdAt", descending: true)
             .getDocuments()
 
-        let lessons = try snapshot.documents.compactMap { document in
-            try document.data(as: Lesson.self)
+        var lessons: [Lesson] = []
+        for document in snapshot.documents {
+            do {
+                let lesson = try document.data(as: Lesson.self)
+                lessons.append(lesson)
+            } catch {
+                print("Error decoding lesson \(document.documentID): \(error)")
+            }
         }
-        return lessons
+        return lessons.sorted { $0.title < $1.title }
     }
 
     func fetchLessonsByCategory(_ category: LessonCategory, limit: Int = 10) async throws -> [Lesson] {
         let snapshot = try await db.collection("lessons")
             .whereField("category", isEqualTo: category.rawValue)
             .limit(to: limit)
-            .order(by: "createdAt", descending: true)
             .getDocuments()
 
-        let lessons = try snapshot.documents.compactMap { document in
-            try document.data(as: Lesson.self)
+        var lessons: [Lesson] = []
+        for document in snapshot.documents {
+            do {
+                let lesson = try document.data(as: Lesson.self)
+                lessons.append(lesson)
+            } catch {
+                print("Error decoding lesson \(document.documentID): \(error)")
+            }
         }
-        return lessons
+        return lessons.sorted { $0.title < $1.title }
     }
 
     // MARK: - User Progress Methods

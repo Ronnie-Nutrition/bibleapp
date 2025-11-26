@@ -15,13 +15,80 @@ struct Lesson: Identifiable, Codable {
     let imageURL: String?
     let duration: Int? // in minutes
     let difficulty: Difficulty
-    let isFavorite: Bool = false
-    let isCompleted: Bool = false
+    var isFavorite: Bool = false
+    var isCompleted: Bool = false
 
     enum CodingKeys: String, CodingKey {
         case id, title, subtitle, content, category, bibleVerses, practicalSteps
         case keyTakeaway, createdAt, updatedAt, imageURL, duration, difficulty
         case isFavorite, isCompleted
+    }
+
+    // Memberwise initializer for direct construction (used in previews and tests)
+    init(
+        id: String,
+        title: String,
+        subtitle: String? = nil,
+        content: String,
+        category: LessonCategory,
+        bibleVerses: [BibleVerse] = [],
+        practicalSteps: [String] = [],
+        keyTakeaway: String,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date(),
+        imageURL: String? = nil,
+        duration: Int? = nil,
+        difficulty: Difficulty = .beginner,
+        isFavorite: Bool = false,
+        isCompleted: Bool = false
+    ) {
+        self.id = id
+        self.title = title
+        self.subtitle = subtitle
+        self.content = content
+        self.category = category
+        self.bibleVerses = bibleVerses
+        self.practicalSteps = practicalSteps
+        self.keyTakeaway = keyTakeaway
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.imageURL = imageURL
+        self.duration = duration
+        self.difficulty = difficulty
+        self.isFavorite = isFavorite
+        self.isCompleted = isCompleted
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
+        content = try container.decode(String.self, forKey: .content)
+        keyTakeaway = try container.decode(String.self, forKey: .keyTakeaway)
+        imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
+        duration = try container.decodeIfPresent(Int.self, forKey: .duration)
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        isCompleted = try container.decodeIfPresent(Bool.self, forKey: .isCompleted) ?? false
+
+        // Decode category from raw string value
+        let categoryString = try container.decode(String.self, forKey: .category)
+        category = LessonCategory(rawValue: categoryString) ?? .leadership
+
+        // Decode difficulty from raw string value
+        let difficultyString = try container.decode(String.self, forKey: .difficulty)
+        difficulty = Difficulty(rawValue: difficultyString) ?? .beginner
+
+        // Decode bible verses
+        bibleVerses = try container.decodeIfPresent([BibleVerse].self, forKey: .bibleVerses) ?? []
+
+        // Decode practical steps
+        practicalSteps = try container.decodeIfPresent([String].self, forKey: .practicalSteps) ?? []
+
+        // Decode dates with fallback
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date()
     }
 }
 
