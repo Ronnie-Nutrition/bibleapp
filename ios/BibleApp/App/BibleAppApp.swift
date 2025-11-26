@@ -61,7 +61,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         print("✓ APNs Device Token registered")
         Messaging.messaging().apnsToken = deviceToken
     }

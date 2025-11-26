@@ -359,28 +359,23 @@ class NotificationPreferencesViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        do {
-            // Reset to defaults
-            notificationsEnabled = true
-            emailNotifications = true
-            dailyLessonsEnabled = true
-            newLessonsEnabled = true
-            announcementsEnabled = true
-            remindersEnabled = true
-            preferredTime = Calendar.current.date(
-                bySettingHour: 9,
-                minute: 0,
-                second: 0,
-                of: Date()
-            ) ?? Date()
-            preferredCategories = []
+        // Reset to defaults
+        notificationsEnabled = true
+        emailNotifications = true
+        dailyLessonsEnabled = true
+        newLessonsEnabled = true
+        announcementsEnabled = true
+        remindersEnabled = true
+        preferredTime = Calendar.current.date(
+            bySettingHour: 9,
+            minute: 0,
+            second: 0,
+            of: Date()
+        ) ?? Date()
+        preferredCategories = []
 
-            isLoading = false
-            print("✓ Preferences reset to defaults")
-        } catch {
-            errorMessage = error.localizedDescription
-            isLoading = false
-        }
+        isLoading = false
+        print("✓ Preferences reset to defaults")
     }
 }
 

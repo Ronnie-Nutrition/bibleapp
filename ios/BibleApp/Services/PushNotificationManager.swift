@@ -62,10 +62,12 @@ class PushNotificationManager: NSObject, ObservableObject {
             forName: NSNotification.Name("FCMToken"),
             object: nil,
             queue: .main
-        ) { notification in
+        ) { [weak self] notification in
             if let token = notification.userInfo?["token"] as? String {
-                self.fcmToken = token
-                print("✓ FCM Token updated: \(String(token.prefix(20)))...")
+                Task { @MainActor in
+                    self?.fcmToken = token
+                    print("✓ FCM Token updated: \(String(token.prefix(20)))...")
+                }
             }
         }
     }
@@ -183,16 +185,8 @@ class PushNotificationManager: NSObject, ObservableObject {
     // MARK: - Analytics
 
     private func logNotificationAction(type: String, lessonId: String = "") {
-        // Log to backend for analytics
-        Task {
-            do {
-                // Analytics logging - using print for now, can integrate with analytics service later
-                print("📊 Analytics: \(type) action for lesson: \(lessonId) at \(Date())")
-            } catch {
-                // Silently fail - don't interrupt user experience
-                print("⚠️  Failed to log notification action: \(error.localizedDescription)")
-            }
-        }
+        // Analytics logging - using print for now, can integrate with analytics service later
+        print("📊 Analytics: \(type) action for lesson: \(lessonId) at \(Date())")
     }
 
     // MARK: - Notification History
