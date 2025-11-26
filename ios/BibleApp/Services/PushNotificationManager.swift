@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import FirebaseMessaging
 
 // MARK: - Push Notification Manager
@@ -93,10 +94,16 @@ class PushNotificationManager: NSObject, ObservableObject {
 
     // MARK: - Notification Logging
 
-    func logReceivedNotification(_ userInfo: [String: Any]) {
+    func logReceivedNotification(_ userInfo: [AnyHashable: Any]) {
+        let stringKeyUserInfo = userInfo.reduce(into: [String: Any]()) { result, item in
+            if let key = item.key as? String {
+                result[key] = item.value
+            }
+        }
+
         let notification: [String: Any] = [
             "timestamp": Date(),
-            "data": userInfo
+            "data": stringKeyUserInfo
         ]
 
         notificationHistory.append(notification)
@@ -107,7 +114,7 @@ class PushNotificationManager: NSObject, ObservableObject {
         }
 
         DispatchQueue.main.async {
-            self.lastNotification = userInfo
+            self.lastNotification = stringKeyUserInfo
         }
     }
 
@@ -122,18 +129,24 @@ class PushNotificationManager: NSObject, ObservableObject {
         logNotificationAction(type: "lesson", lessonId: lessonId)
     }
 
-    func handleNotificationType(_ type: String, data: [String: Any]) {
+    func handleNotificationType(_ type: String, data: [AnyHashable: Any]) {
         print("🔔 Handling notification type: \(type)")
+
+        let stringKeyData = data.reduce(into: [String: Any]()) { result, item in
+            if let key = item.key as? String {
+                result[key] = item.value
+            }
+        }
 
         switch type {
         case "welcome":
             handleWelcomeNotification()
         case "daily-lesson":
-            handleDailyLessonNotification(data: data)
+            handleDailyLessonNotification(data: stringKeyData)
         case "announcement":
-            handleAnnouncementNotification(data: data)
+            handleAnnouncementNotification(data: stringKeyData)
         case "reminder":
-            handleReminderNotification(data: data)
+            handleReminderNotification(data: stringKeyData)
         default:
             print("⚠️  Unknown notification type: \(type)")
         }
@@ -173,19 +186,8 @@ class PushNotificationManager: NSObject, ObservableObject {
         // Log to backend for analytics
         Task {
             do {
-                let networkService = NetworkService()
-                let body: [String: Any] = [
-                    "action": "notification_interaction",
-                    "type": type,
-                    "lessonId": lessonId,
-                    "timestamp": ISO8601DateFormatter().string(from: Date())
-                ]
-
-                let _ = try await networkService.request(
-                    endpoint: "/api/analytics/log",
-                    method: "POST",
-                    body: body
-                )
+                // Analytics logging - using print for now, can integrate with analytics service later
+                print("📊 Analytics: \(type) action for lesson: \(lessonId) at \(Date())")
             } catch {
                 // Silently fail - don't interrupt user experience
                 print("⚠️  Failed to log notification action: \(error.localizedDescription)")

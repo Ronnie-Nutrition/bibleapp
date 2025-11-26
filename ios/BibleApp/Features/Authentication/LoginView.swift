@@ -7,7 +7,7 @@ struct LoginView: View {
     @State private var showingForgotPassword = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack(spacing: 24) {
                 // Header
                 VStack(spacing: 8) {
@@ -129,11 +129,15 @@ struct LoginView: View {
 
                 Spacer()
             }
-            .navigationDestination(isPresented: $showingSignUp) {
-                SignUpView()
+            .sheet(isPresented: $showingSignUp) {
+                NavigationView {
+                    SignUpView()
+                }
             }
-            .navigationDestination(isPresented: $showingForgotPassword) {
-                ForgotPasswordView()
+            .sheet(isPresented: $showingForgotPassword) {
+                NavigationView {
+                    ForgotPasswordView()
+                }
             }
         }
     }
@@ -149,7 +153,7 @@ class LoginViewModel: ObservableObject {
     @Published var emailError: String?
     @Published var passwordError: String?
 
-    private let apiClient = APIClient.shared
+    private let authManager = AuthenticationManager.shared
 
     var isFormValid: Bool {
         !email.isEmpty && !password.isEmpty && emailError == nil
@@ -190,32 +194,26 @@ class LoginViewModel: ObservableObject {
             return
         }
 
-        do {
-            // Call backend login API
-            let response = try await apiClient.loginUser(email: email, password: password)
-            // Success - token is automatically saved in APIClient
-            isLoading = false
-            errorMessage = nil
-        } catch let error as APIError {
-            isLoading = false
-            errorMessage = error.localizedDescription
-        } catch {
-            isLoading = false
-            errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+        // Use Firebase authentication directly
+        await authManager.signIn(email: email, password: password)
+
+        if let error = authManager.errorMessage {
+            errorMessage = error
         }
+        isLoading = false
     }
 }
 
 // MARK: - Sign Up View
 struct SignUpView: View {
     @StateObject private var viewModel = SignUpViewModel()
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         VStack(spacing: 24) {
             // Header
             HStack {
-                Button(action: { dismiss() }) {
+                Button(action: { presentationMode.wrappedValue.dismiss() }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                         Text("Back")
@@ -385,7 +383,7 @@ class SignUpViewModel: ObservableObject {
     @Published var passwordError: String?
     @Published var confirmPasswordError: String?
 
-    private let apiClient = APIClient.shared
+    private let authManager = AuthenticationManager.shared
 
     var isFormValid: Bool {
         !email.isEmpty && !password.isEmpty && !displayName.isEmpty &&
@@ -414,30 +412,9 @@ class SignUpViewModel: ObservableObject {
             return
         }
 
-        var errors: [String] = []
-
-        if password.count < 8 {
-            errors.append("At least 8 characters")
-        }
-
-        if !password.contains(where: { $0.isUppercase }) {
-            errors.append("One uppercase letter")
-        }
-
-        if !password.contains(where: { $0.isLowercase }) {
-            errors.append("One lowercase letter")
-        }
-
-        if !password.contains(where: { $0.isNumber }) {
-            errors.append("One number")
-        }
-
-        if !password.contains(where: { "!@#$%^&*()_+-=[]{};\':\"\\|,.<>/?".contains($0) }) {
-            errors.append("One special character")
-        }
-
-        if !errors.isEmpty {
-            passwordError = "Missing: " + errors.joined(separator: ", ")
+        // Firebase requires minimum 6 characters
+        if password.count < 6 {
+            passwordError = "Password must be at least 6 characters"
         } else {
             passwordError = nil
         }
@@ -461,14 +438,7 @@ class SignUpViewModel: ObservableObject {
             return
         }
 
-        let nameRegex = "^[a-zA-Z\\s'-]+$"
-        let namePredicate = NSPredicate(format: "SELF MATCHES %@", nameRegex)
-
-        if !namePredicate.evaluate(with: trimmed) {
-            displayNameError = "Name can only contain letters, spaces, hyphens, and apostrophes"
-        } else {
-            displayNameError = nil
-        }
+        displayNameError = nil
     }
 
     private func validateConfirmPassword() {
@@ -503,23 +473,13 @@ class SignUpViewModel: ObservableObject {
             return
         }
 
-        do {
-            // Call backend registration API
-            let response = try await apiClient.registerUser(
-                email: email,
-                password: password,
-                displayName: displayName
-            )
-            // Success - token is automatically saved in APIClient
-            isLoading = false
-            errorMessage = nil
-        } catch let error as APIError {
-            isLoading = false
-            errorMessage = error.localizedDescription
-        } catch {
-            isLoading = false
-            errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+        // Use Firebase authentication directly
+        await authManager.signUp(email: email, password: password, displayName: displayName)
+
+        if let error = authManager.errorMessage {
+            errorMessage = error
         }
+        isLoading = false
     }
 }
 
@@ -590,13 +550,13 @@ struct PasswordStrengthIndicator: View {
 // MARK: - Forgot Password View
 struct ForgotPasswordView: View {
     @StateObject private var viewModel = ForgotPasswordViewModel()
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         VStack(spacing: 24) {
             // Header
             HStack {
-                Button(action: { dismiss() }) {
+                Button(action: { presentationMode.wrappedValue.dismiss() }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                         Text("Back")
@@ -714,7 +674,7 @@ class ForgotPasswordViewModel: ObservableObject {
     @Published var successMessage: String?
     @Published var emailError: String?
 
-    private let apiClient = APIClient.shared
+    private let firebaseService = FirebaseService.shared
 
     private func validateEmail() {
         if email.isEmpty {
@@ -745,13 +705,10 @@ class ForgotPasswordViewModel: ObservableObject {
         }
 
         do {
-            // Call backend forgot password endpoint
-            try await apiClient.forgotPassword(email: email)
+            // Use Firebase password reset directly
+            try await firebaseService.sendPasswordReset(email: email)
             successMessage = "Reset link sent to \(email). Check your email for instructions."
             isLoading = false
-        } catch let error as APIError {
-            isLoading = false
-            errorMessage = error.localizedDescription
         } catch {
             isLoading = false
             errorMessage = "Failed to send reset email: \(error.localizedDescription)"

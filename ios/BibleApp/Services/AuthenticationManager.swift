@@ -14,15 +14,27 @@ class AuthenticationManager: NSObject, ObservableObject {
 
     private let firebaseService = FirebaseService.shared
     private var authStateHandle: AuthStateDidChangeListenerHandle?
+    private var isFirebaseConfigured = false
 
     override init() {
         super.init()
-        setupAuthStateListener()
+        // Don't setup listener here - wait for Firebase to be configured
     }
 
     // MARK: - Setup Auth State Listener
 
+    func configureIfNeeded() {
+        guard !isFirebaseConfigured else { return }
+        isFirebaseConfigured = true
+        setupAuthStateListener()
+    }
+
     private func setupAuthStateListener() {
+        // Ensure Firebase is configured before accessing Auth
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
+
         authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             Task { @MainActor in
                 if user != nil {

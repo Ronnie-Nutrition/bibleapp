@@ -62,7 +62,7 @@ struct BibleVerse: Identifiable, Codable {
     let verse: Int
     let endVerse: Int?
     let text: String
-    let reference: String {
+    var reference: String {
         if let endVerse = endVerse, endVerse != verse {
             return "\(book) \(chapter):\(verse)-\(endVerse)"
         }
@@ -71,6 +71,16 @@ struct BibleVerse: Identifiable, Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, book, chapter, verse, endVerse, text
+    }
+
+    // Memberwise initializer
+    init(id: UUID = UUID(), book: String, chapter: Int, verse: Int, endVerse: Int? = nil, text: String) {
+        self.id = id
+        self.book = book
+        self.chapter = chapter
+        self.verse = verse
+        self.endVerse = endVerse
+        self.text = text
     }
 
     init(from decoder: Decoder) throws {
@@ -99,10 +109,10 @@ struct UserProgress: Identifiable, Codable {
     let id: String
     let userId: String
     let lessonId: String
-    let completedAt: Date?
-    let lastViewedAt: Date
-    let isFavorite: Bool
-    let timeSpent: Int? // in seconds
+    var completedAt: Date?
+    var lastViewedAt: Date
+    var isFavorite: Bool
+    var timeSpent: Int? // in seconds
 
     var isCompleted: Bool {
         completedAt != nil

@@ -1,0 +1,522 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA000001000000000001 /* BibleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000001 /* BibleAppApp.swift */; };
+		AA000001000000000002 /* Lesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000002 /* Lesson.swift */; };
+		AA000001000000000003 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000003 /* User.swift */; };
+		AA000001000000000004 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000004 /* APIClient.swift */; };
+		AA000001000000000005 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000005 /* AuthenticationManager.swift */; };
+		AA000001000000000006 /* FirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000006 /* FirebaseService.swift */; };
+		AA000001000000000007 /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000007 /* PushNotificationManager.swift */; };
+		AA000001000000000008 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000008 /* MainTabView.swift */; };
+		AA000001000000000009 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000009 /* LoginView.swift */; };
+		AA000001000000000010 /* LessonDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000010 /* LessonDetailView.swift */; };
+		AA000001000000000011 /* LessonsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000011 /* LessonsViewModel.swift */; };
+		AA000001000000000012 /* NotificationPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000012 /* NotificationPreferencesView.swift */; };
+		AA000001000000000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000020 /* Assets.xcassets */; };
+		AA000001000000000021 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000021 /* LaunchScreen.storyboard */; };
+		AA000001000000000022 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000022 /* GoogleService-Info.plist */; };
+		AA000001000000000030 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000C000000000001 /* FirebaseAuth */; };
+		AA000001000000000031 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000C000000000002 /* FirebaseFirestore */; };
+		AA000001000000000032 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000C000000000003 /* FirebaseMessaging */; };
+		AA000001000000000033 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000C000000000004 /* FirebaseAnalytics */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA000002000000000001 /* BibleAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BibleAppApp.swift; sourceTree = "<group>"; };
+		AA000002000000000002 /* Lesson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lesson.swift; sourceTree = "<group>"; };
+		AA000002000000000003 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		AA000002000000000004 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		AA000002000000000005 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		AA000002000000000006 /* FirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseService.swift; sourceTree = "<group>"; };
+		AA000002000000000007 /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
+		AA000002000000000008 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		AA000002000000000009 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		AA000002000000000010 /* LessonDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonDetailView.swift; sourceTree = "<group>"; };
+		AA000002000000000011 /* LessonsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonsViewModel.swift; sourceTree = "<group>"; };
+		AA000002000000000012 /* NotificationPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferencesView.swift; sourceTree = "<group>"; };
+		AA000002000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA000002000000000021 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		AA000002000000000022 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		AA000002000000000030 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA000002000000000031 /* BibleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BibleApp.entitlements; sourceTree = "<group>"; };
+		AA000003000000000001 /* BibleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA000004000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000001000000000030 /* FirebaseAuth in Frameworks */,
+				AA000001000000000031 /* FirebaseFirestore in Frameworks */,
+				AA000001000000000032 /* FirebaseMessaging in Frameworks */,
+				AA000001000000000033 /* FirebaseAnalytics in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA000005000000000001 = {
+			isa = PBXGroup;
+			children = (
+				AA000005000000000002 /* BibleApp */,
+				AA000005000000000099 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA000005000000000002 /* BibleApp */ = {
+			isa = PBXGroup;
+			children = (
+				AA000005000000000003 /* App */,
+				AA000005000000000004 /* Models */,
+				AA000005000000000005 /* Services */,
+				AA000005000000000006 /* Views */,
+				AA000005000000000007 /* Features */,
+				AA000005000000000008 /* Resources */,
+				AA000002000000000030 /* Info.plist */,
+				AA000002000000000031 /* BibleApp.entitlements */,
+			);
+			path = BibleApp;
+			sourceTree = "<group>";
+		};
+		AA000005000000000003 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000001 /* BibleAppApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		AA000005000000000004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000002 /* Lesson.swift */,
+				AA000002000000000003 /* User.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AA000005000000000005 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000004 /* APIClient.swift */,
+				AA000002000000000005 /* AuthenticationManager.swift */,
+				AA000002000000000006 /* FirebaseService.swift */,
+				AA000002000000000007 /* PushNotificationManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AA000005000000000006 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000008 /* MainTabView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA000005000000000007 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				AA000005000000000010 /* Authentication */,
+				AA000005000000000011 /* Lessons */,
+				AA000005000000000012 /* UserProfile */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		AA000005000000000008 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000020 /* Assets.xcassets */,
+				AA000002000000000021 /* LaunchScreen.storyboard */,
+				AA000002000000000022 /* GoogleService-Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		AA000005000000000010 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000009 /* LoginView.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
+		AA000005000000000011 /* Lessons */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000010 /* LessonDetailView.swift */,
+				AA000002000000000011 /* LessonsViewModel.swift */,
+			);
+			path = Lessons;
+			sourceTree = "<group>";
+		};
+		AA000005000000000012 /* UserProfile */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000012 /* NotificationPreferencesView.swift */,
+			);
+			path = UserProfile;
+			sourceTree = "<group>";
+		};
+		AA000005000000000099 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA000003000000000001 /* BibleApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA000006000000000001 /* BibleApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA000008000000000001 /* Build configuration list for PBXNativeTarget "BibleApp" */;
+			buildPhases = (
+				AA000007000000000001 /* Sources */,
+				AA000004000000000001 /* Frameworks */,
+				AA000007000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BibleApp;
+			packageProductDependencies = (
+				AA00000C000000000001 /* FirebaseAuth */,
+				AA00000C000000000002 /* FirebaseFirestore */,
+				AA00000C000000000003 /* FirebaseMessaging */,
+				AA00000C000000000004 /* FirebaseAnalytics */,
+			);
+			productName = BibleApp;
+			productReference = AA000003000000000001 /* BibleApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA000009000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AA000006000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = AA000008000000000002 /* Build configuration list for PBXProject "BibleApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA000005000000000001;
+			packageReferences = (
+				AA00000B000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			productRefGroup = AA000005000000000099 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA000006000000000001 /* BibleApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA000007000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000001000000000020 /* Assets.xcassets in Resources */,
+				AA000001000000000021 /* LaunchScreen.storyboard in Resources */,
+				AA000001000000000022 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA000007000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000001000000000001 /* BibleAppApp.swift in Sources */,
+				AA000001000000000002 /* Lesson.swift in Sources */,
+				AA000001000000000003 /* User.swift in Sources */,
+				AA000001000000000004 /* APIClient.swift in Sources */,
+				AA000001000000000005 /* AuthenticationManager.swift in Sources */,
+				AA000001000000000006 /* FirebaseService.swift in Sources */,
+				AA000001000000000007 /* PushNotificationManager.swift in Sources */,
+				AA000001000000000008 /* MainTabView.swift in Sources */,
+				AA000001000000000009 /* LoginView.swift in Sources */,
+				AA000001000000000010 /* LessonDetailView.swift in Sources */,
+				AA000001000000000011 /* LessonsViewModel.swift in Sources */,
+				AA000001000000000012 /* NotificationPreferencesView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA00000A000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA00000A000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AA00000A000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BibleApp/BibleApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D66KWXXM88;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BibleApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Biblical Lessons";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bibleapp.biblical;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA00000A000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BibleApp/BibleApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D66KWXXM88;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BibleApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Biblical Lessons";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bibleapp.biblical;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA000008000000000001 /* Build configuration list for PBXNativeTarget "BibleApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA00000A000000000003 /* Debug */,
+				AA00000A000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA000008000000000002 /* Build configuration list for PBXProject "BibleApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA00000A000000000001 /* Debug */,
+				AA00000A000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA00000B000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA00000C000000000001 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA00000B000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		AA00000C000000000002 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA00000B000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		AA00000C000000000003 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA00000B000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		AA00000C000000000004 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA00000B000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = AA000009000000000001 /* Project object */;
+}

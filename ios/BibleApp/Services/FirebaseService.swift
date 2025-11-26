@@ -23,8 +23,30 @@ protocol FirebaseServiceProtocol {
 class FirebaseService: NSObject, FirebaseServiceProtocol {
     static let shared = FirebaseService()
 
-    private let db = Firestore.firestore()
-    private let auth = Auth.auth()
+    private var _db: Firestore?
+    private var _auth: Auth?
+
+    private var db: Firestore {
+        if _db == nil {
+            configureFirebaseIfNeeded()
+            _db = Firestore.firestore()
+        }
+        return _db!
+    }
+
+    private var auth: Auth {
+        if _auth == nil {
+            configureFirebaseIfNeeded()
+            _auth = Auth.auth()
+        }
+        return _auth!
+    }
+
+    private func configureFirebaseIfNeeded() {
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
+    }
 
     // MARK: - Authentication Methods
 
@@ -55,6 +77,10 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
 
     func signOut() throws {
         try auth.signOut()
+    }
+
+    func sendPasswordReset(email: String) async throws {
+        try await auth.sendPasswordReset(withEmail: email)
     }
 
     func getCurrentUser() -> User? {

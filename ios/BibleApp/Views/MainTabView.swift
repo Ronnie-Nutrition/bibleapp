@@ -45,7 +45,7 @@ struct HomeView: View {
     @ObservedObject var lessonsViewModel: LessonsViewModel
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack(spacing: 20) {
                 // Header
                 VStack(alignment: .leading, spacing: 8) {
@@ -132,7 +132,7 @@ struct LessonsListView: View {
     @State private var showFilters = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack(spacing: 12) {
                 // Search Bar
                 HStack {
@@ -201,7 +201,7 @@ struct ProfileView: View {
     @State private var showNotificationPreferences = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack(spacing: 20) {
                 if let user = authManager.currentUser {
                     VStack(spacing: 12) {

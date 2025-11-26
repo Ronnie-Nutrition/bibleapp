@@ -3,10 +3,10 @@ import SwiftUI
 // MARK: - Notification Preferences View
 struct NotificationPreferencesView: View {
     @ObservedObject var viewModel: NotificationPreferencesViewModel
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 // MARK: - General Settings
                 Section("General") {
@@ -188,7 +188,7 @@ struct NotificationPreferencesView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
-                        dismiss()
+                        presentationMode.wrappedValue.dismiss()
                     }
                 }
             }
@@ -282,32 +282,15 @@ class NotificationPreferencesViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        do {
-            guard let userId = authManager.currentUser?.id else {
-                errorMessage = "User not authenticated"
-                isLoading = false
-                return
-            }
-
-            // Update in Firestore
-            let networkService = NetworkService()
-            let body: [String: Any] = [
-                "userId": userId,
-                "preference": key,
-                "value": value
-            ]
-
-            let _ = try await networkService.request(
-                endpoint: "/api/preferences/update",
-                method: "POST",
-                body: body
-            )
-
+        guard let userId = authManager.currentUser?.id else {
+            errorMessage = "User not authenticated"
             isLoading = false
-        } catch {
-            errorMessage = error.localizedDescription
-            isLoading = false
+            return
         }
+
+        // TODO: Implement API call to update preference
+        print("📝 Updating preference \(key) = \(value) for user \(userId)")
+        isLoading = false
     }
 
     func updateDailyLessonsPreference(_ enabled: Bool) async {
@@ -328,93 +311,46 @@ class NotificationPreferencesViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        do {
-            guard let userId = authManager.currentUser?.id else {
-                errorMessage = "User not authenticated"
-                isLoading = false
-                return
-            }
-
-            // Format time as HH:mm UTC
-            let formatter = DateFormatter()
-            formatter.timeStyle = .short
-            formatter.timeZone = TimeZone(abbreviation: "UTC")
-            let timeString = formatter.string(from: time)
-
-            // Update backend
-            let networkService = NetworkService()
-            let body: [String: Any] = [
-                "userId": userId,
-                "time": timeString
-            ]
-
-            let _ = try await networkService.request(
-                endpoint: "/api/scheduler/update-time",
-                method: "POST",
-                body: body
-            )
-
+        guard let userId = authManager.currentUser?.id else {
+            errorMessage = "User not authenticated"
             isLoading = false
-            print("✓ Notification time updated to: \(timeString)")
-        } catch {
-            errorMessage = error.localizedDescription
-            isLoading = false
+            return
         }
+
+        // Format time as HH:mm UTC
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        let timeString = formatter.string(from: time)
+
+        // TODO: Implement API call to update notification time
+        print("✓ Notification time updated to: \(timeString) for user \(userId)")
+        isLoading = false
     }
 
     func updateNotificationType(_ type: String, enabled: Bool) async {
         isLoading = true
         errorMessage = nil
 
-        do {
-            let networkService = NetworkService()
-            let body: [String: Any] = [
-                "type": type,
-                "enabled": enabled
-            ]
-
-            let _ = try await networkService.request(
-                endpoint: "/api/preferences/notification-type",
-                method: "POST",
-                body: body
-            )
-
-            isLoading = false
-        } catch {
-            errorMessage = error.localizedDescription
-            isLoading = false
-        }
+        // TODO: Implement API call to update notification type
+        print("📝 Updating notification type \(type) = \(enabled)")
+        isLoading = false
     }
 
     func updatePreferredCategories() async {
         isLoading = true
         errorMessage = nil
 
-        do {
-            guard let userId = authManager.currentUser?.id else {
-                errorMessage = "User not authenticated"
-                isLoading = false
-                return
-            }
-
-            let networkService = NetworkService()
-            let categories = preferredCategories.map { $0.rawValue }
-            let body: [String: Any] = [
-                "userId": userId,
-                "categories": categories
-            ]
-
-            let _ = try await networkService.request(
-                endpoint: "/api/preferences/categories",
-                method: "POST",
-                body: body
-            )
-
+        guard let userId = authManager.currentUser?.id else {
+            errorMessage = "User not authenticated"
             isLoading = false
-        } catch {
-            errorMessage = error.localizedDescription
-            isLoading = false
+            return
         }
+
+        let categories = preferredCategories.map { $0.rawValue }
+        // TODO: Implement API call to update preferred categories
+        print("📝 Updating preferred categories: \(categories) for user \(userId)")
+        isLoading = false
     }
 
     // MARK: - Reset

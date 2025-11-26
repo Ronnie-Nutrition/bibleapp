@@ -4,7 +4,7 @@ import SwiftUI
 struct LessonDetailView: View {
     let lesson: Lesson
     @ObservedObject var viewModel: LessonsViewModel
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.presentationMode) var presentationMode
     @State private var isCompleted = false
     @State private var isFavorite = false
 
@@ -13,7 +13,7 @@ struct LessonDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Header with Back Button
                 HStack {
-                    Button(action: { dismiss() }) {
+                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left")
                             Text("Back")
@@ -261,7 +261,7 @@ struct LessonDetailView: View {
         difficulty: .intermediate
     )
 
-    NavigationStack {
+    NavigationView {
         LessonDetailView(lesson: sampleLesson, viewModel: LessonsViewModel())
     }
 }

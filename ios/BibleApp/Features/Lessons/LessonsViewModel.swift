@@ -9,9 +9,9 @@ class LessonsViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var filter = LessonFilter()
-    @Published var userProgress: [UserProgress] = [:]
+    @Published var userProgress: [String: UserProgress] = [:]
 
-    private let apiClient = APIClient.shared
+    private let firebaseService = FirebaseService.shared
 
     // MARK: - Initialization
 
@@ -20,11 +20,9 @@ class LessonsViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            // Fetch lessons from backend API
-            lessons = try await apiClient.getLessons()
+            // Fetch lessons from Firebase Firestore
+            lessons = try await firebaseService.fetchLessons(limit: 50)
             applyFilter()
-        } catch let error as APIError {
-            errorMessage = error.localizedDescription
         } catch {
             errorMessage = "Failed to load lessons: \(error.localizedDescription)"
         }
@@ -37,11 +35,9 @@ class LessonsViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            // Fetch lessons by category from backend API
-            lessons = try await apiClient.getLessonsByCategory(category: category)
+            // Fetch lessons by category from Firebase Firestore
+            lessons = try await firebaseService.fetchLessonsByCategory(category, limit: 50)
             applyFilter()
-        } catch let error as APIError {
-            errorMessage = error.localizedDescription
         } catch {
             errorMessage = "Failed to load lessons: \(error.localizedDescription)"
         }
@@ -122,8 +118,8 @@ class LessonsViewModel: ObservableObject {
 
             // TODO: Implement backend endpoint for saving lesson progress
             // For now, update local state only
-            if let index = lessons.firstIndex(where: { $0.id == lessonId }) {
-                userProgress.append(progress)
+            if lessons.firstIndex(where: { $0.id == lessonId }) != nil {
+                userProgress[lessonId] = progress
                 applyFilter()
             }
         } catch {
@@ -132,17 +128,15 @@ class LessonsViewModel: ObservableObject {
     }
 
     func toggleFavorite(lessonId: String) async {
-        if let index = lessons.firstIndex(where: { $0.id == lessonId }) {
+        if lessons.firstIndex(where: { $0.id == lessonId }) != nil {
             // Toggle favorite status
-            let isFavorite = isLessonFavorite(lessonId)
+            let currentFavorite = isLessonFavorite(lessonId)
 
             // TODO: Call backend API to sync favorite status
             // For now, update local progress state
-            if let progressIndex = userProgress.firstIndex(where: { $0.lessonId == lessonId }) {
-                // Create updated progress with toggled favorite
-                var updatedProgress = userProgress[progressIndex]
-                // Note: UserProgress is immutable, so we'd need to modify the model
-                // or create a wrapper for favorite management
+            if var progress = userProgress[lessonId] {
+                progress.isFavorite = !currentFavorite
+                userProgress[lessonId] = progress
                 applyFilter()
             }
         }
@@ -163,16 +157,8 @@ class LessonsViewModel: ObservableObject {
 
 // MARK: - Lessons ViewModel Extension for UserProgress handling
 extension LessonsViewModel {
-    var userProgressDict: [String: UserProgress] {
-        var dict: [String: UserProgress] = [:]
-        for progress in userProgress {
-            dict[progress.lessonId] = progress
-        }
-        return dict
-    }
-
     func getProgressForLesson(_ lessonId: String) -> UserProgress? {
-        userProgressDict[lessonId]
+        userProgress[lessonId]
     }
 
     func isLessonCompleted(_ lessonId: String) -> Bool {

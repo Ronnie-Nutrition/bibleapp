@@ -11,10 +11,16 @@ struct BibleAppApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if authManager.isAuthenticated {
-                MainTabView()
-            } else {
-                LoginView()
+            Group {
+                if authManager.isAuthenticated {
+                    MainTabView()
+                } else {
+                    LoginView()
+                }
+            }
+            .onAppear {
+                // Configure auth manager after Firebase is initialized in AppDelegate
+                authManager.configureIfNeeded()
             }
         }
     }
