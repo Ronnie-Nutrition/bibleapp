@@ -64,7 +64,7 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
         )
 
         // Save user to Firestore
-        try await db.collection("users").document(user.id).setData(from: user)
+        try db.collection("users").document(user.id).setData(from: user)
 
         return user
     }
@@ -150,7 +150,7 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
             throw FirebaseError.notAuthenticated
         }
 
-        try await db.collection("users")
+        try db.collection("users")
             .document(userId)
             .collection("progress")
             .document(lessonId)
@@ -181,7 +181,7 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
         var progress = try await fetchLessonProgress(lessonId: lessonId)
         progress.completedAt = Date()
 
-        try await db.collection("users")
+        try db.collection("users")
             .document(userId)
             .collection("progress")
             .document(lessonId)
