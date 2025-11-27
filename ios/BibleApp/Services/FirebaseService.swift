@@ -15,8 +15,8 @@ protocol FirebaseServiceProtocol {
     func saveLessonProgress(lessonId: String, progress: UserProgress) async throws
     func fetchUserProgress() async throws -> [UserProgress]
     func updateUserPreferences(_ preferences: UserPreferences) async throws
-    func subscribeToTopic(_ topic: String) throws
-    func unsubscribeFromTopic(_ topic: String) throws
+    func subscribeToTopic(_ topic: String)
+    func unsubscribeFromTopic(_ topic: String)
 }
 
 // MARK: - Firebase Service Implementation
@@ -216,11 +216,11 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
 
     // MARK: - Push Notifications
 
-    func subscribeToTopic(_ topic: String) throws {
+    func subscribeToTopic(_ topic: String) {
         Messaging.messaging().subscribe(toTopic: topic)
     }
 
-    func unsubscribeFromTopic(_ topic: String) throws {
+    func unsubscribeFromTopic(_ topic: String) {
         Messaging.messaging().unsubscribe(fromTopic: topic)
     }
 

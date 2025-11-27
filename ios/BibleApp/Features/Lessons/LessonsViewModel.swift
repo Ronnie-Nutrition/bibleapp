@@ -105,25 +105,21 @@ class LessonsViewModel: ObservableObject {
     }
 
     func completeLessonProgress(lessonId: String) async {
-        do {
-            let progress = UserProgress(
-                id: UUID().uuidString,
-                userId: "",
-                lessonId: lessonId,
-                completedAt: Date(),
-                lastViewedAt: Date(),
-                isFavorite: false,
-                timeSpent: 0
-            )
+        let progress = UserProgress(
+            id: UUID().uuidString,
+            userId: "",
+            lessonId: lessonId,
+            completedAt: Date(),
+            lastViewedAt: Date(),
+            isFavorite: false,
+            timeSpent: 0
+        )
 
-            // TODO: Implement backend endpoint for saving lesson progress
-            // For now, update local state only
-            if lessons.firstIndex(where: { $0.id == lessonId }) != nil {
-                userProgress[lessonId] = progress
-                applyFilter()
-            }
-        } catch {
-            errorMessage = error.localizedDescription
+        // TODO: Implement backend endpoint for saving lesson progress
+        // For now, update local state only
+        if lessons.firstIndex(where: { $0.id == lessonId }) != nil {
+            userProgress[lessonId] = progress
+            applyFilter()
         }
     }
 
