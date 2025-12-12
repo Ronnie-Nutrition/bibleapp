@@ -20,8 +20,9 @@ This guide walks you through preparing your app for the Apple App Store.
 - [x] Release build: Compiles successfully
 
 ### Before Submitting (Manual Steps Required)
-- [ ] Privacy Policy URL - Host at your domain
-- [ ] Support URL - Host at your domain
+- [x] Privacy Policy URL: `https://ronnie-nutrition.github.io/bibleapp/privacy-policy.html`
+- [x] Support URL: `https://ronnie-nutrition.github.io/bibleapp/support.html`
+- [ ] Enable GitHub Pages (Settings > Pages > Source: /docs folder)
 - [ ] App Store screenshots (6.7", 6.1", 5.5" displays)
 - [ ] App Store Connect record created
 - [ ] TestFlight testing completed
