@@ -4,7 +4,7 @@
 <dict>
 	<!-- Push Notifications -->
 	<key>aps-environment</key>
-	<string>development</string>
+	<string>production</string>
 
 	<!-- Sign in with Apple -->
 	<key>com.apple.developer.applesignin</key>

@@ -22,6 +22,7 @@
 		AA000001000000000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000020 /* Assets.xcassets */; };
 		AA000001000000000021 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000021 /* LaunchScreen.storyboard */; };
 		AA000001000000000022 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000022 /* GoogleService-Info.plist */; };
+		AA000001000000000023 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000032 /* PrivacyInfo.xcprivacy */; };
 		AA000001000000000030 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000C000000000001 /* FirebaseAuth */; };
 		AA000001000000000031 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000C000000000002 /* FirebaseFirestore */; };
 		AA000001000000000032 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000C000000000003 /* FirebaseMessaging */; };
@@ -46,6 +47,7 @@
 		AA000002000000000022 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AA000002000000000030 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA000002000000000031 /* BibleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BibleApp.entitlements; sourceTree = "<group>"; };
+		AA000002000000000032 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA000003000000000001 /* BibleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -83,6 +85,7 @@
 				AA000005000000000008 /* Resources */,
 				AA000002000000000030 /* Info.plist */,
 				AA000002000000000031 /* BibleApp.entitlements */,
+				AA000002000000000032 /* PrivacyInfo.xcprivacy */,
 			);
 			path = BibleApp;
 			sourceTree = "<group>";
@@ -246,6 +249,7 @@
 				AA000001000000000020 /* Assets.xcassets in Resources */,
 				AA000001000000000021 /* LaunchScreen.storyboard in Resources */,
 				AA000001000000000022 /* GoogleService-Info.plist in Resources */,
+				AA000001000000000023 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

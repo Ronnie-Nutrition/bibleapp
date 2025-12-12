@@ -2,6 +2,33 @@
 
 This guide walks you through preparing your app for the Apple App Store.
 
+---
+
+## Pre-Submission Checklist
+
+### Technical Requirements (Code)
+- [x] PrivacyInfo.xcprivacy - Privacy manifest included
+- [x] Info.plist - All privacy usage descriptions added
+- [x] Entitlements - Push notifications set to `production`
+- [x] Bundle ID: `com.bibleapp.biblical`
+- [x] Version: 1.0.0 (Build 1)
+- [x] Development Team: D66KWXXM88
+- [x] Minimum iOS: 15.0
+- [x] App Icon: Present
+- [x] Launch Screen: Present
+- [x] Firebase configured: Auth, Firestore, Messaging, Analytics
+- [x] Release build: Compiles successfully
+
+### Before Submitting (Manual Steps Required)
+- [ ] Privacy Policy URL - Host at your domain
+- [ ] Support URL - Host at your domain
+- [ ] App Store screenshots (6.7", 6.1", 5.5" displays)
+- [ ] App Store Connect record created
+- [ ] TestFlight testing completed
+- [ ] Associated domain (bibleapp.com) configured (if using universal links)
+
+---
+
 ## Prerequisites
 
 - Apple Developer Account ($99/year)
@@ -12,12 +39,11 @@ This guide walks you through preparing your app for the Apple App Store.
 
 ## Step 1: Create App Bundle ID
 
-### In Xcode:
-1. Open `BibleApp.xcodeproj`
-2. Select the BibleApp target
-3. Go to "Signing & Capabilities"
-4. Verify Bundle Identifier (e.g., `com.yourcompany.bibleapp`)
-5. Ensure the bundle ID matches what you'll register
+### In Xcode (Already Configured):
+Your app is already configured with:
+- **Bundle Identifier**: `com.bibleapp.biblical`
+- **Development Team**: D66KWXXM88
+- **Display Name**: "Biblical Lessons"
 
 ### Register Bundle ID on Apple Developer:
 1. Go to [developer.apple.com](https://developer.apple.com)
@@ -28,7 +54,7 @@ This guide walks you through preparing your app for the Apple App Store.
 6. Select "App IDs"
 7. Fill in:
    - App Name: "Biblical Lessons"
-   - Bundle ID: `com.yourcompany.bibleapp`
+   - Bundle ID: `com.bibleapp.biblical`
    - Capabilities: Push Notifications, Sign in with Apple
 
 ## Step 2: Create Signing Certificates
