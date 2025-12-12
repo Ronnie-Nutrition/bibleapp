@@ -208,6 +208,7 @@ class LoginViewModel: ObservableObject {
 struct SignUpView: View {
     @StateObject private var viewModel = SignUpViewModel()
     @Environment(\.presentationMode) var presentationMode
+    @ObservedObject private var authManager = AuthenticationManager.shared
 
     var body: some View {
         VStack(spacing: 24) {
@@ -365,6 +366,11 @@ struct SignUpView: View {
             .disabled(viewModel.isLoading || !viewModel.isFormValid)
 
             Spacer()
+        }
+        .onChange(of: authManager.isAuthenticated) { isAuthenticated in
+            if isAuthenticated {
+                presentationMode.wrappedValue.dismiss()
+            }
         }
     }
 }
