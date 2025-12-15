@@ -86,7 +86,13 @@ struct Lesson: Identifiable, Codable {
         // Problem-first fields
         problemHook = try container.decodeIfPresent(String.self, forKey: .problemHook)
         benefitStatement = try container.decodeIfPresent(String.self, forKey: .benefitStatement)
-        problemTags = try container.decodeIfPresent([ProblemCategory].self, forKey: .problemTags) ?? []
+
+        // Decode problemTags robustly - decode as strings first, then convert to enum
+        if let tagStrings = try container.decodeIfPresent([String].self, forKey: .problemTags) {
+            problemTags = tagStrings.compactMap { ProblemCategory(rawValue: $0) }
+        } else {
+            problemTags = []
+        }
 
         // Decode category from raw string value
         let categoryString = try container.decode(String.self, forKey: .category)
