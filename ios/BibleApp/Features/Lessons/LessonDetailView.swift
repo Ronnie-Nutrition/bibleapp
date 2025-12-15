@@ -5,20 +5,22 @@ struct LessonDetailView: View {
     let lesson: Lesson
     @ObservedObject var viewModel: LessonsViewModel
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
     @State private var isCompleted = false
     @State private var isFavorite = false
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.xl) {
                 // Header with Back Button
                 HStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                        HStack(spacing: 4) {
+                        HStack(spacing: AppTheme.Spacing.xs) {
                             Image(systemName: "chevron.left")
                             Text("Back")
                         }
-                        .foregroundColor(.blue)
+                        .font(AppTheme.Typography.callout)
+                        .foregroundColor(AppTheme.Colors.royalGold)
                     }
 
                     Spacer()
@@ -31,71 +33,61 @@ struct LessonDetailView: View {
                         }
                     }) {
                         Image(systemName: isFavorite ? "heart.fill" : "heart")
-                            .foregroundColor(isFavorite ? .red : .gray)
+                            .font(.system(size: 22))
+                            .foregroundColor(isFavorite ? AppTheme.Colors.richBurgundy : AppTheme.Colors.warmGray)
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
+                .padding(.horizontal, AppTheme.Spacing.xl)
+                .padding(.top, AppTheme.Spacing.md)
 
                 // Lesson Image/Header
                 if let imageURL = lesson.imageURL {
                     AsyncImage(url: URL(string: imageURL)) { phase in
                         switch phase {
                         case .empty:
-                            Color(.systemGray6)
+                            lessonHeaderPlaceholder
                         case .success(let image):
                             image
                                 .resizable()
                                 .scaledToFill()
+                                .frame(height: 200)
+                                .clipped()
+                                .overlay(
+                                    LinearGradient(
+                                        colors: [.clear, AppTheme.Colors.deepIndigo.opacity(0.3)],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
                         case .failure:
-                            Color(.systemGray6)
+                            lessonHeaderPlaceholder
                         @unknown default:
-                            Color(.systemGray6)
+                            lessonHeaderPlaceholder
                         }
                     }
                     .frame(height: 200)
-                    .clipped()
+                    .cornerRadius(AppTheme.CornerRadius.large)
+                    .padding(.horizontal, AppTheme.Spacing.xl)
                 } else {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.blue.opacity(0.1))
-                        .frame(height: 200)
-                        .overlay(
-                            VStack {
-                                Image(systemName: "book")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.blue)
-                            }
-                        )
-                        .padding(.horizontal, 20)
+                    lessonHeaderPlaceholder
+                        .padding(.horizontal, AppTheme.Spacing.xl)
                 }
 
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
                     // Category and Metadata
-                    HStack(spacing: 12) {
+                    HStack(spacing: AppTheme.Spacing.sm) {
                         Text(lesson.category.description)
-                            .font(.caption)
-                            .padding(6)
-                            .background(Color.blue.opacity(0.1))
-                            .foregroundColor(.blue)
-                            .cornerRadius(4)
+                            .categoryBadge()
 
                         Text(lesson.difficulty.displayName)
-                            .font(.caption)
-                            .padding(6)
-                            .background(Color.orange.opacity(0.1))
-                            .foregroundColor(.orange)
-                            .cornerRadius(4)
+                            .categoryBadge(color: AppTheme.Colors.amberGlow)
 
                         if let duration = lesson.duration {
                             HStack(spacing: 4) {
                                 Image(systemName: "clock")
                                 Text("\(duration) min")
                             }
-                            .font(.caption)
-                            .padding(6)
-                            .background(Color.green.opacity(0.1))
-                            .foregroundColor(.green)
-                            .cornerRadius(4)
+                            .categoryBadge(color: AppTheme.Colors.successGreen)
                         }
 
                         Spacer()
@@ -103,70 +95,77 @@ struct LessonDetailView: View {
 
                     // Title
                     Text(lesson.title)
-                        .font(.system(size: 24, weight: .bold))
+                        .font(AppTheme.Typography.title)
+                        .foregroundColor(AppTheme.Colors.primaryText)
                         .lineLimit(3)
 
                     // Subtitle
                     if let subtitle = lesson.subtitle {
                         Text(subtitle)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Typography.subheadline)
+                            .foregroundColor(AppTheme.Colors.secondaryText)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, AppTheme.Spacing.xl)
 
                 // Main Content
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: AppTheme.Spacing.xl) {
                     // Key Takeaway
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+                        HStack(spacing: AppTheme.Spacing.sm) {
                             Image(systemName: "lightbulb.fill")
-                                .foregroundColor(.yellow)
+                                .foregroundColor(AppTheme.Colors.amberGlow)
                             Text("Key Takeaway")
-                                .font(.headline)
+                                .font(AppTheme.Typography.headline)
+                                .foregroundColor(AppTheme.Colors.primaryText)
                         }
 
                         Text(lesson.keyTakeaway)
-                            .font(.body)
-                            .foregroundColor(.primary)
+                            .font(AppTheme.Typography.body)
+                            .foregroundColor(AppTheme.Colors.primaryText)
+                            .lineSpacing(4)
                     }
-                    .padding(16)
-                    .background(Color.yellow.opacity(0.1))
-                    .cornerRadius(8)
+                    .padding(AppTheme.Spacing.lg)
+                    .background(AppTheme.Colors.amberGlow.opacity(0.1))
+                    .cornerRadius(AppTheme.CornerRadius.medium)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                            .stroke(AppTheme.Colors.amberGlow.opacity(0.3), lineWidth: 1)
+                    )
 
                     // Content
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
                         Text("Lesson")
-                            .font(.headline)
+                            .font(AppTheme.Typography.headline)
+                            .foregroundColor(AppTheme.Colors.primaryText)
 
                         Text(lesson.content)
-                            .font(.body)
+                            .font(AppTheme.Typography.body)
                             .lineSpacing(6)
-                            .foregroundColor(.primary)
+                            .foregroundColor(AppTheme.Colors.primaryText)
                     }
 
                     // Bible Verses
                     if !lesson.bibleVerses.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
                             Text("Scripture References")
-                                .font(.headline)
+                                .font(AppTheme.Typography.headline)
+                                .foregroundColor(AppTheme.Colors.primaryText)
 
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
                                 ForEach(lesson.bibleVerses) { verse in
-                                    VStack(alignment: .leading, spacing: 4) {
+                                    VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
                                         Text(verse.reference)
-                                            .font(.caption)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.blue)
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(AppTheme.Colors.royalGold)
 
                                         Text("\"\(verse.text)\"")
-                                            .font(.body)
+                                            .font(AppTheme.Typography.body)
                                             .italic()
-                                            .foregroundColor(.primary)
+                                            .foregroundColor(AppTheme.Colors.primaryText)
+                                            .lineSpacing(4)
                                     }
-                                    .padding(12)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
+                                    .premiumCard(padding: AppTheme.Spacing.md)
                                 }
                             }
                         }
@@ -174,37 +173,38 @@ struct LessonDetailView: View {
 
                     // Practical Steps
                     if !lesson.practicalSteps.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
                             Text("Apply This Lesson")
-                                .font(.headline)
+                                .font(AppTheme.Typography.headline)
+                                .foregroundColor(AppTheme.Colors.primaryText)
 
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
                                 ForEach(Array(lesson.practicalSteps.enumerated()), id: \.offset) { index, step in
-                                    HStack(alignment: .top, spacing: 12) {
+                                    HStack(alignment: .top, spacing: AppTheme.Spacing.md) {
                                         ZStack {
                                             Circle()
-                                                .fill(Color.green)
-                                                .frame(width: 24, height: 24)
+                                                .fill(AppTheme.Gradients.primaryButton)
+                                                .frame(width: 28, height: 28)
 
                                             Text("\(index + 1)")
-                                                .font(.caption)
-                                                .fontWeight(.semibold)
+                                                .font(.system(size: 14, weight: .bold))
                                                 .foregroundColor(.white)
                                         }
 
                                         Text(step)
-                                            .font(.body)
+                                            .font(AppTheme.Typography.body)
                                             .lineSpacing(4)
-                                            .foregroundColor(.primary)
+                                            .foregroundColor(AppTheme.Colors.primaryText)
 
                                         Spacer()
                                     }
+                                    .padding(.vertical, AppTheme.Spacing.xs)
                                 }
                             }
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, AppTheme.Spacing.xl)
 
                 // Complete Button
                 Button(action: {
@@ -213,27 +213,69 @@ struct LessonDetailView: View {
                         await viewModel.completeLessonProgress(lessonId: lesson.id)
                     }
                 }) {
-                    HStack {
-                        Image(systemName: "checkmark")
-                        Text(isCompleted ? "Lesson Completed ✓" : "Mark as Complete")
+                    HStack(spacing: AppTheme.Spacing.sm) {
+                        Image(systemName: isCompleted ? "checkmark.circle.fill" : "checkmark")
+                        Text(isCompleted ? "Lesson Completed" : "Mark as Complete")
+                            .font(.system(size: 16, weight: .semibold))
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(12)
-                    .background(isCompleted ? Color.green : Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppTheme.Spacing.md)
+                .background(
+                    Group {
+                        if isCompleted {
+                            AppTheme.Colors.successGreen
+                        } else {
+                            AppTheme.Gradients.primaryButton
+                        }
+                    }
+                )
+                .foregroundColor(.white)
+                .cornerRadius(AppTheme.CornerRadius.medium)
+                .shadow(
+                    color: isCompleted ? AppTheme.Colors.successGreen.opacity(0.3) : AppTheme.Colors.royalGold.opacity(0.3),
+                    radius: 8,
+                    y: 4
+                )
+                .padding(.horizontal, AppTheme.Spacing.xl)
+                .padding(.top, AppTheme.Spacing.md)
 
-                Spacer(minLength: 40)
+                Spacer(minLength: AppTheme.Spacing.xxxl)
             }
         }
+        .background(
+            colorScheme == .dark ? AppTheme.Colors.darkBackground : AppTheme.Colors.background
+        )
         .navigationBarBackButtonHidden(true)
         .onAppear {
             isCompleted = viewModel.isLessonCompleted(lesson.id)
             isFavorite = viewModel.isLessonFavorite(lesson.id)
         }
+    }
+
+    // MARK: - Helper Views
+
+    private var lessonHeaderPlaceholder: some View {
+        RoundedRectangle(cornerRadius: AppTheme.CornerRadius.large)
+            .fill(
+                LinearGradient(
+                    colors: [AppTheme.Colors.softGold.opacity(0.3), AppTheme.Colors.royalGold.opacity(0.2)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .frame(height: 200)
+            .overlay(
+                VStack(spacing: AppTheme.Spacing.sm) {
+                    Image(systemName: "book.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(AppTheme.Colors.royalGold)
+
+                    Text(lesson.category.description)
+                        .font(AppTheme.Typography.caption)
+                        .foregroundColor(AppTheme.Colors.royalGold)
+                }
+            )
     }
 }
 

@@ -4,14 +4,20 @@ import SwiftUI
 struct NotificationPreferencesView: View {
     @ObservedObject var viewModel: NotificationPreferencesViewModel
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         NavigationView {
-            Form {
-                // MARK: - General Settings
-                Section("General") {
-                    Toggle("Enable Notifications", isOn: $viewModel.notificationsEnabled)
-                        .onChange(of: viewModel.notificationsEnabled) { newValue in
+            ScrollView {
+                VStack(spacing: AppTheme.Spacing.xl) {
+                    // MARK: - General Settings
+                    PreferenceSection(title: "General") {
+                        PremiumToggleRow(
+                            title: "Enable Notifications",
+                            icon: "bell.fill",
+                            iconColor: AppTheme.Colors.royalGold,
+                            isOn: $viewModel.notificationsEnabled
+                        ) { newValue in
                             Task {
                                 await viewModel.updatePreference(
                                     key: "notificationsEnabled",
@@ -20,9 +26,16 @@ struct NotificationPreferencesView: View {
                             }
                         }
 
-                    if viewModel.notificationsEnabled {
-                        Toggle("Email Notifications", isOn: $viewModel.emailNotifications)
-                            .onChange(of: viewModel.emailNotifications) { newValue in
+                        if viewModel.notificationsEnabled {
+                            Divider()
+                                .padding(.horizontal, AppTheme.Spacing.md)
+
+                            PremiumToggleRow(
+                                title: "Email Notifications",
+                                icon: "envelope.fill",
+                                iconColor: AppTheme.Colors.amberGlow,
+                                isOn: $viewModel.emailNotifications
+                            ) { newValue in
                                 Task {
                                     await viewModel.updatePreference(
                                         key: "emailNotifications",
@@ -30,54 +43,79 @@ struct NotificationPreferencesView: View {
                                     )
                                 }
                             }
+                        }
                     }
-                }
 
-                // MARK: - Daily Lesson Settings
-                if viewModel.notificationsEnabled {
-                    Section("Daily Lesson Reminders") {
-                        Toggle("Daily Lessons", isOn: $viewModel.dailyLessonsEnabled)
-                            .onChange(of: viewModel.dailyLessonsEnabled) { newValue in
+                    // MARK: - Daily Lesson Settings
+                    if viewModel.notificationsEnabled {
+                        PreferenceSection(title: "Daily Lesson Reminders") {
+                            PremiumToggleRow(
+                                title: "Daily Lessons",
+                                icon: "book.fill",
+                                iconColor: AppTheme.Colors.successGreen,
+                                isOn: $viewModel.dailyLessonsEnabled
+                            ) { newValue in
                                 Task {
                                     await viewModel.updateDailyLessonsPreference(newValue)
                                 }
                             }
 
-                        if viewModel.dailyLessonsEnabled {
-                            // Time Picker
-                            HStack {
-                                Text("Preferred Time")
-                                Spacer()
-                                DatePicker(
-                                    "Time",
-                                    selection: $viewModel.preferredTime,
-                                    displayedComponents: .hourAndMinute
-                                )
-                                .labelsHidden()
-                                .onChange(of: viewModel.preferredTime) { newTime in
-                                    Task {
-                                        await viewModel.updateNotificationTime(newTime)
+                            if viewModel.dailyLessonsEnabled {
+                                Divider()
+                                    .padding(.horizontal, AppTheme.Spacing.md)
+
+                                // Time Picker
+                                HStack {
+                                    HStack(spacing: AppTheme.Spacing.sm) {
+                                        Image(systemName: "clock.fill")
+                                            .foregroundColor(AppTheme.Colors.royalGold)
+                                        Text("Preferred Time")
+                                            .font(AppTheme.Typography.body)
+                                            .foregroundColor(AppTheme.Colors.primaryText)
+                                    }
+                                    Spacer()
+                                    DatePicker(
+                                        "Time",
+                                        selection: $viewModel.preferredTime,
+                                        displayedComponents: .hourAndMinute
+                                    )
+                                    .labelsHidden()
+                                    .tint(AppTheme.Colors.royalGold)
+                                    .onChange(of: viewModel.preferredTime) { newTime in
+                                        Task {
+                                            await viewModel.updateNotificationTime(newTime)
+                                        }
                                     }
                                 }
-                            }
+                                .padding(AppTheme.Spacing.md)
 
-                            // Current setting display
-                            HStack {
-                                Text("Current Time")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(viewModel.formattedPreferredTime)
-                                    .fontWeight(.semibold)
+                                Divider()
+                                    .padding(.horizontal, AppTheme.Spacing.md)
+
+                                // Current setting display
+                                HStack {
+                                    Text("Current Time")
+                                        .font(AppTheme.Typography.body)
+                                        .foregroundColor(AppTheme.Colors.secondaryText)
+                                    Spacer()
+                                    Text(viewModel.formattedPreferredTime)
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(AppTheme.Colors.royalGold)
+                                }
+                                .padding(AppTheme.Spacing.md)
                             }
                         }
                     }
-                }
 
-                // MARK: - Notification Types
-                if viewModel.notificationsEnabled {
-                    Section("Notification Types") {
-                        Toggle("New Lessons", isOn: $viewModel.newLessonsEnabled)
-                            .onChange(of: viewModel.newLessonsEnabled) { newValue in
+                    // MARK: - Notification Types
+                    if viewModel.notificationsEnabled {
+                        PreferenceSection(title: "Notification Types") {
+                            PremiumToggleRow(
+                                title: "New Lessons",
+                                icon: "sparkles",
+                                iconColor: AppTheme.Colors.amberGlow,
+                                isOn: $viewModel.newLessonsEnabled
+                            ) { newValue in
                                 Task {
                                     await viewModel.updateNotificationType(
                                         "new-lessons",
@@ -86,8 +124,15 @@ struct NotificationPreferencesView: View {
                                 }
                             }
 
-                        Toggle("Announcements", isOn: $viewModel.announcementsEnabled)
-                            .onChange(of: viewModel.announcementsEnabled) { newValue in
+                            Divider()
+                                .padding(.horizontal, AppTheme.Spacing.md)
+
+                            PremiumToggleRow(
+                                title: "Announcements",
+                                icon: "megaphone.fill",
+                                iconColor: AppTheme.Colors.richBurgundy,
+                                isOn: $viewModel.announcementsEnabled
+                            ) { newValue in
                                 Task {
                                     await viewModel.updateNotificationType(
                                         "announcements",
@@ -96,8 +141,15 @@ struct NotificationPreferencesView: View {
                                 }
                             }
 
-                        Toggle("Reminders", isOn: $viewModel.remindersEnabled)
-                            .onChange(of: viewModel.remindersEnabled) { newValue in
+                            Divider()
+                                .padding(.horizontal, AppTheme.Spacing.md)
+
+                            PremiumToggleRow(
+                                title: "Reminders",
+                                icon: "bell.badge.fill",
+                                iconColor: AppTheme.Colors.successGreen,
+                                isOn: $viewModel.remindersEnabled
+                            ) { newValue in
                                 Task {
                                     await viewModel.updateNotificationType(
                                         "reminders",
@@ -105,91 +157,130 @@ struct NotificationPreferencesView: View {
                                     )
                                 }
                             }
+                        }
                     }
-                }
 
-                // MARK: - Category Preferences
-                if viewModel.notificationsEnabled {
-                    Section("Preferred Categories") {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Choose which lesson categories you'd like to receive")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                    // MARK: - Category Preferences
+                    if viewModel.notificationsEnabled {
+                        PreferenceSection(title: "Preferred Categories") {
+                            VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
+                                Text("Choose which lesson categories you'd like to receive")
+                                    .font(AppTheme.Typography.caption)
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                    .padding(.horizontal, AppTheme.Spacing.md)
+                                    .padding(.top, AppTheme.Spacing.sm)
 
-                            ForEach(LessonCategory.allCases, id: \.self) { category in
-                                Toggle(category.description, isOn: Binding(
-                                    get: {
-                                        viewModel.preferredCategories.contains(category)
-                                    },
-                                    set: { isSelected in
-                                        if isSelected {
-                                            viewModel.preferredCategories.append(category)
-                                        } else {
-                                            viewModel.preferredCategories.removeAll {
-                                                $0 == category
-                                            }
-                                        }
-
-                                        Task {
-                                            await viewModel.updatePreferredCategories()
-                                        }
+                                ForEach(Array(LessonCategory.allCases.enumerated()), id: \.element) { index, category in
+                                    if index > 0 {
+                                        Divider()
+                                            .padding(.horizontal, AppTheme.Spacing.md)
                                     }
-                                ))
+
+                                    PremiumToggleRow(
+                                        title: category.description,
+                                        icon: categoryIcon(for: category),
+                                        iconColor: AppTheme.Colors.royalGold,
+                                        isOn: Binding(
+                                            get: {
+                                                viewModel.preferredCategories.contains(category)
+                                            },
+                                            set: { isSelected in
+                                                if isSelected {
+                                                    viewModel.preferredCategories.append(category)
+                                                } else {
+                                                    viewModel.preferredCategories.removeAll {
+                                                        $0 == category
+                                                    }
+                                                }
+
+                                                Task {
+                                                    await viewModel.updatePreferredCategories()
+                                                }
+                                            }
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                // MARK: - Status
-                Section {
+                    // MARK: - Status
                     if viewModel.isLoading {
-                        HStack {
+                        HStack(spacing: AppTheme.Spacing.sm) {
                             ProgressView()
+                                .tint(AppTheme.Colors.royalGold)
                             Text("Updating preferences...")
-                                .foregroundColor(.secondary)
+                                .font(AppTheme.Typography.caption)
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                         }
+                        .frame(maxWidth: .infinity)
+                        .padding(AppTheme.Spacing.md)
                     } else if let errorMessage = viewModel.errorMessage {
-                        HStack(spacing: 12) {
-                            Image(systemName: "exclamationmark.circle")
-                                .foregroundColor(.red)
-                            Text(errorMessage)
-                                .font(.caption)
-                                .foregroundColor(.red)
-                        }
+                        ErrorMessageView(message: errorMessage)
+                            .padding(.horizontal, AppTheme.Spacing.lg)
                     } else {
-                        HStack {
+                        HStack(spacing: AppTheme.Spacing.sm) {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
+                                .foregroundColor(AppTheme.Colors.successGreen)
                             Text("Preferences saved")
-                                .foregroundColor(.secondary)
+                                .font(AppTheme.Typography.caption)
+                                .foregroundColor(AppTheme.Colors.secondaryText)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(AppTheme.Spacing.md)
+                    }
+
+                    // MARK: - Debug Info (Development Only)
+                    #if DEBUG
+                    PreferenceSection(title: "Debug Info") {
+                        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+                            Text("FCM Token:")
+                                .font(AppTheme.Typography.caption)
+                                .foregroundColor(AppTheme.Colors.secondaryText)
+                            Text(PushNotificationManager.shared.fcmToken ?? "Not set")
+                                .font(AppTheme.Typography.smallCaption)
+                                .foregroundColor(AppTheme.Colors.warmGray)
+                                .lineLimit(2)
+                                .truncationMode(.middle)
+                        }
+                        .padding(AppTheme.Spacing.md)
+
+                        Divider()
+                            .padding(.horizontal, AppTheme.Spacing.md)
+
+                        Button(action: {
+                            Task {
+                                await viewModel.resetPreferences()
+                            }
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.counterclockwise")
+                                Text("Reset Preferences")
+                            }
+                            .font(AppTheme.Typography.body)
+                            .foregroundColor(AppTheme.Colors.richBurgundy)
+                            .frame(maxWidth: .infinity)
+                            .padding(AppTheme.Spacing.md)
                         }
                     }
-                }
+                    #endif
 
-                // MARK: - Debug Info (Development Only)
-                #if DEBUG
-                Section("Debug Info") {
-                    Text("FCM Token: \(PushNotificationManager.shared.fcmToken ?? "Not set")")
-                        .font(.caption)
-                        .lineLimit(2)
-                        .truncationMode(.middle)
-
-                    Button("Reset Preferences") {
-                        Task {
-                            await viewModel.resetPreferences()
-                        }
-                    }
-                    .foregroundColor(.red)
+                    Spacer(minLength: AppTheme.Spacing.xxxl)
                 }
-                #endif
+                .padding(.top, AppTheme.Spacing.lg)
             }
-            .navigationTitle("Notification Preferences")
+            .background(
+                colorScheme == .dark ? AppTheme.Colors.darkBackground : AppTheme.Colors.background
+            )
+            .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         presentationMode.wrappedValue.dismiss()
                     }
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(AppTheme.Colors.royalGold)
                 }
             }
         }
@@ -198,6 +289,98 @@ struct NotificationPreferencesView: View {
                 await viewModel.loadPreferences()
             }
         }
+    }
+
+    // Helper function to get icon for each category
+    private func categoryIcon(for category: LessonCategory) -> String {
+        switch category {
+        case .leadership:
+            return "person.3.fill"
+        case .stewardship:
+            return "dollarsign.circle.fill"
+        case .integrity:
+            return "shield.fill"
+        case .perseverance:
+            return "figure.climbing"
+        case .wisdom:
+            return "lightbulb.fill"
+        case .trust:
+            return "hands.sparkles.fill"
+        case .service:
+            return "hand.raised.fill"
+        case .community:
+            return "person.2.fill"
+        case .timeManagement:
+            return "clock.fill"
+        case .decision:
+            return "arrow.triangle.branch"
+        }
+    }
+}
+
+// MARK: - Supporting Views
+
+struct PreferenceSection<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: Content
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+            Text(title.uppercased())
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.secondaryText)
+                .tracking(0.5)
+                .padding(.horizontal, AppTheme.Spacing.xl)
+
+            VStack(spacing: 0) {
+                content
+            }
+            .background(
+                colorScheme == .dark ? AppTheme.Colors.darkCardBackground : AppTheme.Colors.cardBackground
+            )
+            .cornerRadius(AppTheme.CornerRadius.large)
+            .padding(.horizontal, AppTheme.Spacing.lg)
+        }
+    }
+}
+
+struct PremiumToggleRow: View {
+    let title: String
+    let icon: String
+    let iconColor: Color
+    @Binding var isOn: Bool
+    var onChange: ((Bool) -> Void)?
+
+    init(title: String, icon: String, iconColor: Color, isOn: Binding<Bool>, onChange: ((Bool) -> Void)? = nil) {
+        self.title = title
+        self.icon = icon
+        self.iconColor = iconColor
+        self._isOn = isOn
+        self.onChange = onChange
+    }
+
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.md) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundColor(iconColor)
+                .frame(width: 24)
+
+            Text(title)
+                .font(AppTheme.Typography.body)
+                .foregroundColor(AppTheme.Colors.primaryText)
+
+            Spacer()
+
+            Toggle("", isOn: $isOn)
+                .tint(AppTheme.Colors.royalGold)
+                .labelsHidden()
+                .onChange(of: isOn) { newValue in
+                    onChange?(newValue)
+                }
+        }
+        .padding(AppTheme.Spacing.md)
     }
 }
 
@@ -289,7 +472,7 @@ class NotificationPreferencesViewModel: ObservableObject {
         }
 
         // TODO: Implement API call to update preference
-        print("📝 Updating preference \(key) = \(value) for user \(userId)")
+        print("Updating preference \(key) = \(value) for user \(userId)")
         isLoading = false
     }
 
@@ -324,7 +507,7 @@ class NotificationPreferencesViewModel: ObservableObject {
         let timeString = formatter.string(from: time)
 
         // TODO: Implement API call to update notification time
-        print("✓ Notification time updated to: \(timeString) for user \(userId)")
+        print("Notification time updated to: \(timeString) for user \(userId)")
         isLoading = false
     }
 
@@ -333,7 +516,7 @@ class NotificationPreferencesViewModel: ObservableObject {
         errorMessage = nil
 
         // TODO: Implement API call to update notification type
-        print("📝 Updating notification type \(type) = \(enabled)")
+        print("Updating notification type \(type) = \(enabled)")
         isLoading = false
     }
 
@@ -349,7 +532,7 @@ class NotificationPreferencesViewModel: ObservableObject {
 
         let categories = preferredCategories.map { $0.rawValue }
         // TODO: Implement API call to update preferred categories
-        print("📝 Updating preferred categories: \(categories) for user \(userId)")
+        print("Updating preferred categories: \(categories) for user \(userId)")
         isLoading = false
     }
 
@@ -375,7 +558,7 @@ class NotificationPreferencesViewModel: ObservableObject {
         preferredCategories = []
 
         isLoading = false
-        print("✓ Preferences reset to defaults")
+        print("Preferences reset to defaults")
     }
 }
 

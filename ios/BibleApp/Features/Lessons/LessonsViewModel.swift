@@ -45,6 +45,28 @@ class LessonsViewModel: ObservableObject {
         isLoading = false
     }
 
+    // MARK: - Problem-First Filtering
+
+    func filterByProblem(_ problem: ProblemCategory) {
+        filter.problemCategory = problem
+        applyFilter()
+    }
+
+    func getLessonsForProblem(_ problem: ProblemCategory) -> [Lesson] {
+        lessons.filter { $0.problemTags.contains(problem) }
+    }
+
+    func getTopProblems() -> [ProblemCategory] {
+        // Return problems that have lessons available, sorted by count
+        var problemCounts: [ProblemCategory: Int] = [:]
+        for lesson in lessons {
+            for problem in lesson.problemTags {
+                problemCounts[problem, default: 0] += 1
+            }
+        }
+        return problemCounts.sorted { $0.value > $1.value }.map { $0.key }
+    }
+
     // MARK: - Filtering
 
     func applyFilter() {
@@ -68,14 +90,23 @@ class LessonsViewModel: ObservableObject {
             return false
         }
 
-        // Check search text
+        // Check problem category filter
+        if let problemCategory = filter.problemCategory {
+            if !lesson.problemTags.contains(problemCategory) {
+                return false
+            }
+        }
+
+        // Check search text (also search problem hook and benefit)
         if !filter.searchText.isEmpty {
             let searchLower = filter.searchText.lowercased()
             let matchesTitle = lesson.title.lowercased().contains(searchLower)
             let matchesSubtitle = lesson.subtitle?.lowercased().contains(searchLower) ?? false
             let matchesContent = lesson.content.lowercased().contains(searchLower)
+            let matchesHook = lesson.problemHook?.lowercased().contains(searchLower) ?? false
+            let matchesBenefit = lesson.benefitStatement?.lowercased().contains(searchLower) ?? false
 
-            if !matchesTitle && !matchesSubtitle && !matchesContent {
+            if !matchesTitle && !matchesSubtitle && !matchesContent && !matchesHook && !matchesBenefit {
                 return false
             }
         }

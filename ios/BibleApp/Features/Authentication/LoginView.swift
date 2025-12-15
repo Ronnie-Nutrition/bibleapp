@@ -5,130 +5,103 @@ struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
     @State private var showingSignUp = false
     @State private var showingForgotPassword = false
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
-                // Header
-                VStack(spacing: 8) {
-                    Text("Biblical Lessons")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.primary)
+            ScrollView {
+                VStack(spacing: AppTheme.Spacing.xxl) {
+                    // Header
+                    VStack(spacing: AppTheme.Spacing.sm) {
+                        // App Icon/Logo area
+                        ZStack {
+                            Circle()
+                                .fill(AppTheme.Gradients.goldShimmer)
+                                .frame(width: 80, height: 80)
 
-                    Text("For Entrepreneurs")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.secondary)
-                }
-                .padding(.top, 40)
+                            Image(systemName: "book.fill")
+                                .font(.system(size: 36))
+                                .foregroundColor(.white)
+                        }
+                        .shadow(color: AppTheme.Colors.royalGold.opacity(0.3), radius: 12, y: 4)
+                        .padding(.bottom, AppTheme.Spacing.sm)
 
-                Spacer()
+                        Text("Biblical Lessons")
+                            .font(AppTheme.Typography.largeTitle)
+                            .foregroundColor(AppTheme.Colors.primaryText)
 
-                // Login Form
-                VStack(spacing: 16) {
-                    // Email Field
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Email")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
+                        Text("For Entrepreneurs")
+                            .font(AppTheme.Typography.headline)
+                            .foregroundColor(AppTheme.Colors.royalGold)
+                    }
+                    .padding(.top, AppTheme.Spacing.xxxl)
 
-                        TextField("user@example.com", text: $viewModel.email)
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.emailAddress)
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
+                    // Login Form
+                    VStack(spacing: AppTheme.Spacing.lg) {
+                        // Email Field
+                        PremiumTextField(
+                            label: "Email",
+                            placeholder: "you@example.com",
+                            text: $viewModel.email,
+                            errorMessage: viewModel.emailError,
+                            keyboardType: .emailAddress
+                        )
 
-                        if viewModel.emailError != nil {
-                            Text(viewModel.emailError ?? "")
-                                .font(.caption)
-                                .foregroundColor(.red)
+                        // Password Field
+                        PremiumSecureField(
+                            label: "Password",
+                            placeholder: "Enter your password",
+                            text: $viewModel.password,
+                            errorMessage: viewModel.passwordError
+                        )
+
+                        // General Error Message
+                        if let error = viewModel.errorMessage, viewModel.emailError == nil && viewModel.passwordError == nil {
+                            ErrorMessageView(message: error)
                         }
                     }
+                    .padding(.horizontal, AppTheme.Spacing.xl)
 
-                    // Password Field
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Password")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-
-                        SecureField("Enter password", text: $viewModel.password)
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-
-                        if viewModel.passwordError != nil {
-                            Text(viewModel.passwordError ?? "")
-                                .font(.caption)
-                                .foregroundColor(.red)
+                    // Sign In Button
+                    GradientButton(
+                        title: "Sign In",
+                        icon: "arrow.right",
+                        isLoading: viewModel.isLoading,
+                        isDisabled: !viewModel.isFormValid
+                    ) {
+                        Task {
+                            await viewModel.signIn()
                         }
                     }
+                    .padding(.horizontal, AppTheme.Spacing.xl)
 
-                    // General Error Message
-                    if let error = viewModel.errorMessage, viewModel.emailError == nil && viewModel.passwordError == nil {
-                        VStack(spacing: 8) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.red)
-                                Text(error)
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                                Spacer()
-                            }
+                    // Forgot Password Link
+                    Button(action: { showingForgotPassword = true }) {
+                        Text("Forgot Password?")
+                            .font(AppTheme.Typography.callout)
+                            .foregroundColor(AppTheme.Colors.royalGold)
+                    }
+
+                    // Sign Up Link
+                    HStack(spacing: AppTheme.Spacing.sm) {
+                        Text("Don't have an account?")
+                            .font(AppTheme.Typography.body)
+                            .foregroundColor(AppTheme.Colors.secondaryText)
+
+                        Button(action: { showingSignUp = true }) {
+                            Text("Sign Up")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(AppTheme.Colors.royalGold)
                         }
-                        .padding(8)
-                        .background(Color(.systemRed).opacity(0.1))
-                        .cornerRadius(6)
                     }
+                    .padding(.top, AppTheme.Spacing.sm)
+
+                    Spacer(minLength: AppTheme.Spacing.xxxl)
                 }
-                .padding(.horizontal, 20)
-
-                // Sign In Button
-                Button(action: {
-                    Task {
-                        await viewModel.signIn()
-                    }
-                }) {
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .tint(.white)
-                    } else {
-                        Text("Sign In")
-                            .fontWeight(.semibold)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(12)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                .padding(.horizontal, 20)
-                .disabled(viewModel.isLoading || !viewModel.isFormValid)
-
-                // Forgot Password Link
-                Button(action: { showingForgotPassword = true }) {
-                    Text("Forgot Password?")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                }
-                .padding(.horizontal, 20)
-
-                // Sign Up Link
-                HStack(spacing: 8) {
-                    Text("Don't have an account?")
-                        .foregroundColor(.secondary)
-
-                    Button(action: { showingSignUp = true }) {
-                        Text("Sign Up")
-                            .fontWeight(.semibold)
-                            .foregroundColor(.blue)
-                    }
-                }
-                .padding(.top, 8)
-
-                Spacer()
             }
+            .background(
+                colorScheme == .dark ? AppTheme.Colors.darkBackground : AppTheme.Colors.background
+            )
             .sheet(isPresented: $showingSignUp) {
                 NavigationView {
                     SignUpView()
@@ -209,164 +182,108 @@ struct SignUpView: View {
     @StateObject private var viewModel = SignUpViewModel()
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject private var authManager = AuthenticationManager.shared
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        VStack(spacing: 24) {
-            // Header
-            HStack {
-                Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .foregroundColor(.blue)
-                }
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-
-            // Title
-            VStack(spacing: 8) {
-                Text("Create Account")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.primary)
-
-                Text("Join our community of faithful entrepreneurs")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-
-            // Sign Up Form
-            ScrollView {
-                VStack(spacing: 16) {
-                    // Display Name
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Full Name")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-
-                        TextField("John Doe", text: $viewModel.displayName)
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-
-                        if viewModel.displayNameError != nil {
-                            Text(viewModel.displayNameError ?? "")
-                                .font(.caption)
-                                .foregroundColor(.red)
+        ScrollView {
+            VStack(spacing: AppTheme.Spacing.xxl) {
+                // Header
+                HStack {
+                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                        HStack(spacing: AppTheme.Spacing.xs) {
+                            Image(systemName: "chevron.left")
+                            Text("Back")
                         }
+                        .font(AppTheme.Typography.callout)
+                        .foregroundColor(AppTheme.Colors.royalGold)
                     }
+                    Spacer()
+                }
+                .padding(.horizontal, AppTheme.Spacing.xl)
+                .padding(.top, AppTheme.Spacing.md)
+
+                // Title
+                VStack(spacing: AppTheme.Spacing.sm) {
+                    Text("Create Account")
+                        .font(AppTheme.Typography.title)
+                        .foregroundColor(AppTheme.Colors.primaryText)
+
+                    Text("Join our community of faithful entrepreneurs")
+                        .font(AppTheme.Typography.callout)
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, AppTheme.Spacing.xl)
+
+                // Sign Up Form
+                VStack(spacing: AppTheme.Spacing.lg) {
+                    // Display Name
+                    PremiumTextField(
+                        label: "Full Name",
+                        placeholder: "John Doe",
+                        text: $viewModel.displayName,
+                        errorMessage: viewModel.displayNameError
+                    )
 
                     // Email
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Email")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-
-                        TextField("user@example.com", text: $viewModel.email)
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.emailAddress)
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-
-                        if viewModel.emailError != nil {
-                            Text(viewModel.emailError ?? "")
-                                .font(.caption)
-                                .foregroundColor(.red)
-                        }
-                    }
+                    PremiumTextField(
+                        label: "Email",
+                        placeholder: "you@example.com",
+                        text: $viewModel.email,
+                        errorMessage: viewModel.emailError,
+                        keyboardType: .emailAddress
+                    )
 
                     // Password
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Password")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-
-                        SecureField("Min 8 chars, mix of characters", text: $viewModel.password)
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
+                    VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+                        PremiumSecureField(
+                            label: "Password",
+                            placeholder: "Min 6 characters",
+                            text: $viewModel.password,
+                            errorMessage: viewModel.passwordError
+                        )
 
                         if !viewModel.password.isEmpty {
                             PasswordStrengthIndicator(password: viewModel.password)
-                        }
-
-                        if viewModel.passwordError != nil {
-                            Text(viewModel.passwordError ?? "")
-                                .font(.caption)
-                                .foregroundColor(.red)
+                                .padding(.top, AppTheme.Spacing.xs)
                         }
                     }
 
                     // Confirm Password
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Confirm Password")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-
-                        SecureField("Re-enter password", text: $viewModel.confirmPassword)
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-
-                        if viewModel.confirmPasswordError != nil {
-                            Text(viewModel.confirmPasswordError ?? "")
-                                .font(.caption)
-                                .foregroundColor(.red)
-                        }
-                    }
+                    PremiumSecureField(
+                        label: "Confirm Password",
+                        placeholder: "Re-enter password",
+                        text: $viewModel.confirmPassword,
+                        errorMessage: viewModel.confirmPasswordError
+                    )
 
                     // General Error Message
                     if let error = viewModel.errorMessage {
-                        VStack(spacing: 8) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.red)
-                                Text(error)
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                                Spacer()
-                            }
-                        }
-                        .padding(8)
-                        .background(Color(.systemRed).opacity(0.1))
-                        .cornerRadius(6)
+                        ErrorMessageView(message: error)
                     }
                 }
-                .padding(.horizontal, 20)
-            }
+                .padding(.horizontal, AppTheme.Spacing.xl)
 
-            // Sign Up Button
-            Button(action: {
-                Task {
-                    await viewModel.signUp()
+                // Sign Up Button
+                GradientButton(
+                    title: "Create Account",
+                    icon: "person.badge.plus",
+                    isLoading: viewModel.isLoading,
+                    isDisabled: !viewModel.isFormValid
+                ) {
+                    Task {
+                        await viewModel.signUp()
+                    }
                 }
-            }) {
-                if viewModel.isLoading {
-                    ProgressView()
-                        .tint(.white)
-                } else {
-                    Text("Create Account")
-                        .fontWeight(.semibold)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(12)
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-            .padding(.horizontal, 20)
-            .disabled(viewModel.isLoading || !viewModel.isFormValid)
+                .padding(.horizontal, AppTheme.Spacing.xl)
 
-            Spacer()
+                Spacer(minLength: AppTheme.Spacing.xxxl)
+            }
         }
+        .background(
+            colorScheme == .dark ? AppTheme.Colors.darkBackground : AppTheme.Colors.background
+        )
         .onChange(of: authManager.isAuthenticated) { isAuthenticated in
             if isAuthenticated {
                 presentationMode.wrappedValue.dismiss()
@@ -517,34 +434,33 @@ struct PasswordStrengthIndicator: View {
 
     private var strengthColor: Color {
         switch strengthScore {
-        case 0...2: return .red
-        case 3: return .orange
-        case 4: return .yellow
-        case 5: return .green
-        default: return .gray
+        case 0...2: return AppTheme.Colors.richBurgundy
+        case 3: return AppTheme.Colors.amberGlow
+        case 4: return AppTheme.Colors.royalGold
+        case 5: return AppTheme.Colors.successGreen
+        default: return AppTheme.Colors.warmGray
         }
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
             // Strength bars
-            HStack(spacing: 4) {
+            HStack(spacing: AppTheme.Spacing.xs) {
                 ForEach(0..<5, id: \.self) { index in
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(index < strengthScore ? strengthColor : Color(.systemGray4))
+                        .fill(index < strengthScore ? strengthColor : AppTheme.Colors.warmGray.opacity(0.3))
                         .frame(height: 4)
                 }
             }
 
             // Strength text
             HStack {
-                Text("Strength: ")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text("Strength:")
+                    .font(AppTheme.Typography.smallCaption)
+                    .foregroundColor(AppTheme.Colors.secondaryText)
 
                 Text(strengthText)
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(strengthColor)
 
                 Spacer()
@@ -557,117 +473,89 @@ struct PasswordStrengthIndicator: View {
 struct ForgotPasswordView: View {
     @StateObject private var viewModel = ForgotPasswordViewModel()
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        VStack(spacing: 24) {
-            // Header
-            HStack {
-                Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .foregroundColor(.blue)
-                }
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-
-            // Title
-            VStack(spacing: 8) {
-                Text("Reset Password")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.primary)
-
-                Text("Enter your email to receive password reset instructions")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-
-            Spacer()
-
-            // Email Form
-            VStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Email")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-
-                    TextField("user@example.com", text: $viewModel.email)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.emailAddress)
-                        .padding(12)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-
-                    if viewModel.emailError != nil {
-                        Text(viewModel.emailError ?? "")
-                            .font(.caption)
-                            .foregroundColor(.red)
-                    }
-                }
-
-                if let error = viewModel.errorMessage {
-                    VStack(spacing: 8) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .foregroundColor(.red)
-                            Text(error)
-                                .font(.caption)
-                                .foregroundColor(.red)
-                            Spacer()
+        ScrollView {
+            VStack(spacing: AppTheme.Spacing.xxl) {
+                // Header
+                HStack {
+                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                        HStack(spacing: AppTheme.Spacing.xs) {
+                            Image(systemName: "chevron.left")
+                            Text("Back")
                         }
+                        .font(AppTheme.Typography.callout)
+                        .foregroundColor(AppTheme.Colors.royalGold)
                     }
-                    .padding(8)
-                    .background(Color(.systemRed).opacity(0.1))
-                    .cornerRadius(6)
+                    Spacer()
+                }
+                .padding(.horizontal, AppTheme.Spacing.xl)
+                .padding(.top, AppTheme.Spacing.md)
+
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(AppTheme.Colors.softGold.opacity(0.3))
+                        .frame(width: 80, height: 80)
+
+                    Image(systemName: "key.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(AppTheme.Colors.royalGold)
                 }
 
-                if viewModel.successMessage != nil {
-                    VStack(spacing: 8) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                            Text(viewModel.successMessage ?? "")
-                                .font(.caption)
-                                .foregroundColor(.green)
-                            Spacer()
-                        }
+                // Title
+                VStack(spacing: AppTheme.Spacing.sm) {
+                    Text("Reset Password")
+                        .font(AppTheme.Typography.title)
+                        .foregroundColor(AppTheme.Colors.primaryText)
+
+                    Text("Enter your email to receive password reset instructions")
+                        .font(AppTheme.Typography.callout)
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, AppTheme.Spacing.xl)
+
+                // Email Form
+                VStack(spacing: AppTheme.Spacing.lg) {
+                    PremiumTextField(
+                        label: "Email",
+                        placeholder: "you@example.com",
+                        text: $viewModel.email,
+                        errorMessage: viewModel.emailError,
+                        keyboardType: .emailAddress
+                    )
+
+                    if let error = viewModel.errorMessage {
+                        ErrorMessageView(message: error)
                     }
-                    .padding(8)
-                    .background(Color(.systemGreen).opacity(0.1))
-                    .cornerRadius(6)
-                }
-            }
-            .padding(.horizontal, 20)
 
-            // Send Button
-            Button(action: {
-                Task {
-                    await viewModel.sendResetEmail()
+                    if let success = viewModel.successMessage {
+                        SuccessMessageView(message: success)
+                    }
                 }
-            }) {
-                if viewModel.isLoading {
-                    ProgressView()
-                        .tint(.white)
-                } else {
-                    Text("Send Reset Link")
-                        .fontWeight(.semibold)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(12)
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-            .padding(.horizontal, 20)
-            .disabled(viewModel.isLoading || viewModel.email.isEmpty)
+                .padding(.horizontal, AppTheme.Spacing.xl)
 
-            Spacer()
+                // Send Button
+                GradientButton(
+                    title: "Send Reset Link",
+                    icon: "paperplane.fill",
+                    isLoading: viewModel.isLoading,
+                    isDisabled: viewModel.email.isEmpty
+                ) {
+                    Task {
+                        await viewModel.sendResetEmail()
+                    }
+                }
+                .padding(.horizontal, AppTheme.Spacing.xl)
+
+                Spacer(minLength: AppTheme.Spacing.xxxl)
+            }
         }
+        .background(
+            colorScheme == .dark ? AppTheme.Colors.darkBackground : AppTheme.Colors.background
+        )
     }
 }
 
@@ -719,6 +607,101 @@ class ForgotPasswordViewModel: ObservableObject {
             isLoading = false
             errorMessage = "Failed to send reset email: \(error.localizedDescription)"
         }
+    }
+}
+
+// MARK: - Premium Form Components
+
+struct PremiumTextField: View {
+    let label: String
+    let placeholder: String
+    @Binding var text: String
+    var errorMessage: String?
+    var keyboardType: UIKeyboardType = .default
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+            Text(label)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.secondaryText)
+                .textCase(.uppercase)
+
+            TextField(placeholder, text: $text)
+                .textInputAutocapitalization(.never)
+                .keyboardType(keyboardType)
+                .font(AppTheme.Typography.body)
+                .premiumInput()
+
+            if let error = errorMessage {
+                Text(error)
+                    .font(AppTheme.Typography.smallCaption)
+                    .foregroundColor(AppTheme.Colors.richBurgundy)
+            }
+        }
+    }
+}
+
+struct PremiumSecureField: View {
+    let label: String
+    let placeholder: String
+    @Binding var text: String
+    var errorMessage: String?
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+            Text(label)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.secondaryText)
+                .textCase(.uppercase)
+
+            SecureField(placeholder, text: $text)
+                .font(AppTheme.Typography.body)
+                .premiumInput()
+
+            if let error = errorMessage {
+                Text(error)
+                    .font(AppTheme.Typography.smallCaption)
+                    .foregroundColor(AppTheme.Colors.richBurgundy)
+            }
+        }
+    }
+}
+
+struct ErrorMessageView: View {
+    let message: String
+
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.sm) {
+            Image(systemName: "exclamationmark.circle.fill")
+                .foregroundColor(AppTheme.Colors.richBurgundy)
+            Text(message)
+                .font(AppTheme.Typography.caption)
+                .foregroundColor(AppTheme.Colors.richBurgundy)
+            Spacer()
+        }
+        .padding(AppTheme.Spacing.md)
+        .background(AppTheme.Colors.richBurgundy.opacity(0.1))
+        .cornerRadius(AppTheme.CornerRadius.small)
+    }
+}
+
+struct SuccessMessageView: View {
+    let message: String
+
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.sm) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(AppTheme.Colors.successGreen)
+            Text(message)
+                .font(AppTheme.Typography.caption)
+                .foregroundColor(AppTheme.Colors.successGreen)
+            Spacer()
+        }
+        .padding(AppTheme.Spacing.md)
+        .background(AppTheme.Colors.successGreen.opacity(0.1))
+        .cornerRadius(AppTheme.CornerRadius.small)
     }
 }
 

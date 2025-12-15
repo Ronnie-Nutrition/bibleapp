@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA000001000000000013 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000013 /* Theme.swift */; };
 		AA000001000000000001 /* BibleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000001 /* BibleAppApp.swift */; };
 		AA000001000000000002 /* Lesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000002 /* Lesson.swift */; };
 		AA000001000000000003 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000003 /* User.swift */; };
@@ -30,6 +31,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AA000002000000000013 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		AA000002000000000001 /* BibleAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BibleAppApp.swift; sourceTree = "<group>"; };
 		AA000002000000000002 /* Lesson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lesson.swift; sourceTree = "<group>"; };
 		AA000002000000000003 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -82,12 +84,21 @@
 				AA000005000000000005 /* Services */,
 				AA000005000000000006 /* Views */,
 				AA000005000000000007 /* Features */,
+				AA000005000000000013 /* Theme */,
 				AA000005000000000008 /* Resources */,
 				AA000002000000000030 /* Info.plist */,
 				AA000002000000000031 /* BibleApp.entitlements */,
 				AA000002000000000032 /* PrivacyInfo.xcprivacy */,
 			);
 			path = BibleApp;
+			sourceTree = "<group>";
+		};
+		AA000005000000000013 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000013 /* Theme.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 		AA000005000000000003 /* App */ = {
@@ -260,6 +271,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA000001000000000013 /* Theme.swift in Sources */,
 				AA000001000000000001 /* BibleAppApp.swift in Sources */,
 				AA000001000000000002 /* Lesson.swift in Sources */,
 				AA000001000000000003 /* User.swift in Sources */,
