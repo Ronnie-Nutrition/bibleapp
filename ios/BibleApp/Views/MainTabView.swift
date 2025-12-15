@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Main Tab View
 struct MainTabView: View {
     @StateObject private var lessonsViewModel = LessonsViewModel()
+    @StateObject private var onboardingManager = OnboardingManager.shared
     @State private var selectedTab: Tab = .home
     @Environment(\.colorScheme) var colorScheme
 
@@ -13,31 +14,37 @@ struct MainTabView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // Home Tab
-            HomeView(lessonsViewModel: lessonsViewModel)
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(Tab.home)
+        Group {
+            if onboardingManager.hasCompletedOnboarding {
+                TabView(selection: $selectedTab) {
+                    // Home Tab
+                    HomeView(lessonsViewModel: lessonsViewModel, onboardingManager: onboardingManager)
+                        .tabItem {
+                            Label("Home", systemImage: "house.fill")
+                        }
+                        .tag(Tab.home)
 
-            // Lessons Tab
-            LessonsListView(viewModel: lessonsViewModel)
-                .tabItem {
-                    Label("Lessons", systemImage: "book.fill")
-                }
-                .tag(Tab.lessons)
+                    // Lessons Tab
+                    LessonsListView(viewModel: lessonsViewModel)
+                        .tabItem {
+                            Label("Lessons", systemImage: "book.fill")
+                        }
+                        .tag(Tab.lessons)
 
-            // Profile Tab
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.fill")
+                    // Profile Tab
+                    ProfileView()
+                        .tabItem {
+                            Label("Profile", systemImage: "person.fill")
+                        }
+                        .tag(Tab.profile)
                 }
-                .tag(Tab.profile)
-        }
-        .tint(AppTheme.Colors.royalGold)
-        .task {
-            await lessonsViewModel.loadLessons()
+                .tint(AppTheme.Colors.royalGold)
+                .task {
+                    await lessonsViewModel.loadLessons()
+                }
+            } else {
+                OnboardingView(onboardingManager: onboardingManager)
+            }
         }
     }
 }
@@ -45,15 +52,42 @@ struct MainTabView: View {
 // MARK: - Home View
 struct HomeView: View {
     @ObservedObject var lessonsViewModel: LessonsViewModel
+    @ObservedObject var onboardingManager: OnboardingManager
     @State private var selectedProblem: ProblemCategory?
     @Environment(\.colorScheme) var colorScheme
+
+    // Personalized lessons based on user's primary challenge
+    var personalizedLessons: [Lesson] {
+        if let challenge = onboardingManager.primaryChallenge {
+            let filtered = lessonsViewModel.getLessonsForProblem(challenge)
+            return filtered.isEmpty ? Array(lessonsViewModel.lessons.prefix(5)) : Array(filtered.prefix(5))
+        }
+        return Array(lessonsViewModel.lessons.prefix(5))
+    }
+
+    // Ordered problem categories - user's challenge first
+    var orderedProblems: [ProblemCategory] {
+        var problems = Array(ProblemCategory.allCases.prefix(6))
+        if let challenge = onboardingManager.primaryChallenge,
+           let index = problems.firstIndex(of: challenge) {
+            problems.remove(at: index)
+            problems.insert(challenge, at: 0)
+        }
+        return problems
+    }
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: AppTheme.Spacing.xxl) {
-                    // Welcome Header - Problem-First
+                    // Personalized Welcome Header
                     VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+                        if !onboardingManager.userName.isEmpty {
+                            Text("Welcome back, \(onboardingManager.userName)")
+                                .font(AppTheme.Typography.callout)
+                                .foregroundColor(AppTheme.Colors.burntOrange)
+                        }
+
                         Text("What's Troubling You?")
                             .font(AppTheme.Typography.largeTitle)
                             .foregroundColor(AppTheme.Colors.primaryText)
@@ -66,50 +100,92 @@ struct HomeView: View {
                     .padding(.horizontal, AppTheme.Spacing.xl)
                     .padding(.top, AppTheme.Spacing.lg)
 
-                    // Problem Categories Grid - THE MAIN ENTRY POINT
-                    VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
-                        LazyVGrid(columns: [
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ], spacing: AppTheme.Spacing.md) {
-                            ForEach(Array(ProblemCategory.allCases.prefix(6)), id: \.self) { problem in
-                                NavigationLink(destination: ProblemLessonsView(problem: problem, viewModel: lessonsViewModel)) {
-                                    ProblemCardView(problem: problem)
+                    // Personalized "For You" Section (if user has a primary challenge)
+                    if let challenge = onboardingManager.primaryChallenge, !personalizedLessons.isEmpty {
+                        VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("For You")
+                                        .sectionHeader()
+                                    Text("Based on: \(challenge.displayText.replacingOccurrences(of: "?", with: ""))")
+                                        .font(AppTheme.Typography.smallCaption)
+                                        .foregroundColor(AppTheme.Colors.burntOrange)
+                                }
+                                Spacer()
+                                NavigationLink(destination: ProblemLessonsView(problem: challenge, viewModel: lessonsViewModel)) {
+                                    Text("See All")
+                                        .font(AppTheme.Typography.callout)
+                                        .foregroundColor(AppTheme.Colors.burntOrange)
                                 }
                             }
-                        }
-                        .padding(.horizontal, AppTheme.Spacing.xl)
-                    }
+                            .padding(.horizontal, AppTheme.Spacing.xl)
 
-                    // Featured Solutions (Recent Lessons with Problem-First Display)
-                    VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
-                        HStack {
-                            Text("Solutions For You")
-                                .sectionHeader()
-                            Spacer()
-                            NavigationLink("See All") {
-                                LessonsListView(viewModel: lessonsViewModel)
-                            }
-                            .font(AppTheme.Typography.callout)
-                            .foregroundColor(AppTheme.Colors.burntOrange)
-                        }
-                        .padding(.horizontal, AppTheme.Spacing.xl)
-
-                        if lessonsViewModel.isLoading {
-                            ProgressView()
-                                .tint(AppTheme.Colors.burntOrange)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.vertical, AppTheme.Spacing.xxxl)
-                        } else {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: AppTheme.Spacing.lg) {
-                                    ForEach(lessonsViewModel.lessons.prefix(5)) { lesson in
+                                    ForEach(personalizedLessons) { lesson in
                                         NavigationLink(destination: LessonDetailView(lesson: lesson, viewModel: lessonsViewModel)) {
                                             ProblemFirstLessonCard(lesson: lesson)
                                         }
                                     }
                                 }
                                 .padding(.horizontal, AppTheme.Spacing.xl)
+                            }
+                        }
+                    }
+
+                    // Problem Categories Grid - THE MAIN ENTRY POINT
+                    VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
+                        Text("Explore Challenges")
+                            .sectionHeader()
+                            .padding(.horizontal, AppTheme.Spacing.xl)
+
+                        LazyVGrid(columns: [
+                            GridItem(.flexible()),
+                            GridItem(.flexible())
+                        ], spacing: AppTheme.Spacing.md) {
+                            ForEach(orderedProblems, id: \.self) { problem in
+                                NavigationLink(destination: ProblemLessonsView(problem: problem, viewModel: lessonsViewModel)) {
+                                    ProblemCardView(
+                                        problem: problem,
+                                        isHighlighted: problem == onboardingManager.primaryChallenge
+                                    )
+                                }
+                            }
+                        }
+                        .padding(.horizontal, AppTheme.Spacing.xl)
+                    }
+
+                    // Recent Solutions (if no personalized section shown)
+                    if onboardingManager.primaryChallenge == nil {
+                        VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
+                            HStack {
+                                Text("Solutions For You")
+                                    .sectionHeader()
+                                Spacer()
+                                NavigationLink("See All") {
+                                    LessonsListView(viewModel: lessonsViewModel)
+                                }
+                                .font(AppTheme.Typography.callout)
+                                .foregroundColor(AppTheme.Colors.burntOrange)
+                            }
+                            .padding(.horizontal, AppTheme.Spacing.xl)
+
+                            if lessonsViewModel.isLoading {
+                                ProgressView()
+                                    .tint(AppTheme.Colors.burntOrange)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.vertical, AppTheme.Spacing.xxxl)
+                            } else {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: AppTheme.Spacing.lg) {
+                                        ForEach(lessonsViewModel.lessons.prefix(5)) { lesson in
+                                            NavigationLink(destination: LessonDetailView(lesson: lesson, viewModel: lessonsViewModel)) {
+                                                ProblemFirstLessonCard(lesson: lesson)
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, AppTheme.Spacing.xl)
+                                }
                             }
                         }
                     }
@@ -151,17 +227,30 @@ struct HomeView: View {
 // MARK: - Problem Card View
 struct ProblemCardView: View {
     let problem: ProblemCategory
+    var isHighlighted: Bool = false
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
-            Image(systemName: problem.icon)
-                .font(.system(size: 24))
-                .foregroundColor(AppTheme.Colors.burntOrange)
+            HStack {
+                Image(systemName: problem.icon)
+                    .font(.system(size: 24))
+                    .foregroundColor(isHighlighted ? .white : AppTheme.Colors.burntOrange)
+
+                if isHighlighted {
+                    Spacer()
+                    Text("Your Focus")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(.white.opacity(0.9))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color.white.opacity(0.25)))
+                }
+            }
 
             Text(problem.displayText)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(AppTheme.Colors.primaryText)
+                .foregroundColor(isHighlighted ? .white : AppTheme.Colors.primaryText)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
         }
@@ -169,12 +258,18 @@ struct ProblemCardView: View {
         .frame(height: 90)
         .padding(AppTheme.Spacing.md)
         .background(
-            colorScheme == .dark ? AppTheme.Colors.darkCardBackground : AppTheme.Colors.cardBackground
+            Group {
+                if isHighlighted {
+                    AppTheme.Gradients.primaryButton
+                } else {
+                    colorScheme == .dark ? AppTheme.Colors.darkCardBackground : AppTheme.Colors.cardBackground
+                }
+            }
         )
         .cornerRadius(AppTheme.CornerRadius.medium)
         .overlay(
             RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
-                .stroke(AppTheme.Colors.burntOrange.opacity(0.2), lineWidth: 1)
+                .stroke(isHighlighted ? AppTheme.Colors.burntOrange : AppTheme.Colors.burntOrange.opacity(0.2), lineWidth: isHighlighted ? 2 : 1)
         )
     }
 }
