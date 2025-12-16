@@ -65,9 +65,9 @@ struct HomeView: View {
         return Array(lessonsViewModel.lessons.prefix(5))
     }
 
-    // Ordered problem categories - user's challenge first
+    // Ordered problem categories - user's challenge first, all 10 shown
     var orderedProblems: [ProblemCategory] {
-        var problems = Array(ProblemCategory.allCases.prefix(6))
+        var problems = Array(ProblemCategory.allCases)
         if let challenge = onboardingManager.primaryChallenge,
            let index = problems.firstIndex(of: challenge) {
             problems.remove(at: index)
