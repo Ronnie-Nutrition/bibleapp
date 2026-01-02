@@ -1,14 +1,17 @@
 import SwiftUI
+import AVFoundation
 
 // MARK: - Main Tab View
 struct MainTabView: View {
     @StateObject private var lessonsViewModel = LessonsViewModel()
     @StateObject private var onboardingManager = OnboardingManager.shared
+    @StateObject private var bookmarksManager = BookmarksManager.shared
     @State private var selectedTab: Tab = .home
     @Environment(\.colorScheme) var colorScheme
 
     enum Tab {
         case home
+        case saved
         case lessons
         case profile
     }
@@ -23,6 +26,13 @@ struct MainTabView: View {
                             Label("Home", systemImage: "house.fill")
                         }
                         .tag(Tab.home)
+
+                    // Saved/Bookmarks Tab
+                    SavedLessonsView(viewModel: lessonsViewModel, bookmarksManager: bookmarksManager)
+                        .tabItem {
+                            Label("Saved", systemImage: "bookmark.fill")
+                        }
+                        .tag(Tab.saved)
 
                     // Lessons Tab
                     LessonsListView(viewModel: lessonsViewModel)
@@ -153,6 +163,37 @@ struct HomeView: View {
                             }
                         }
                         .padding(.horizontal, AppTheme.Spacing.xl)
+                    }
+
+                    // Learning Paths Section
+                    VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
+                        HStack {
+                            Text("Learning Paths")
+                                .sectionHeader()
+                            Spacer()
+                            NavigationLink(destination: LearningPathsView(viewModel: lessonsViewModel)) {
+                                Text("See All")
+                                    .font(AppTheme.Typography.callout)
+                                    .foregroundColor(AppTheme.Colors.burntOrange)
+                            }
+                        }
+                        .padding(.horizontal, AppTheme.Spacing.xl)
+
+                        Text("Structured journeys to master biblical business principles")
+                            .font(AppTheme.Typography.caption)
+                            .foregroundColor(AppTheme.Colors.secondaryText)
+                            .padding(.horizontal, AppTheme.Spacing.xl)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: AppTheme.Spacing.md) {
+                                ForEach(LearningPathsData.allPaths.prefix(3)) { path in
+                                    NavigationLink(destination: LearningPathDetailView(path: path, viewModel: lessonsViewModel)) {
+                                        LearningPathPreviewCard(path: path)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, AppTheme.Spacing.xl)
+                        }
                     }
 
                     // Recent Solutions (if no personalized section shown)
@@ -368,27 +409,62 @@ struct ProblemLessonsView: View {
                 .padding(.horizontal, AppTheme.Spacing.xl)
                 .padding(.top, AppTheme.Spacing.lg)
 
-                // Lessons for this problem
-                if lessonsForProblem.isEmpty {
+                // Show loading state or lessons
+                if viewModel.isLoading {
                     VStack(spacing: AppTheme.Spacing.md) {
-                        Image(systemName: "book.closed")
+                        ProgressView()
+                            .tint(AppTheme.Colors.burntOrange)
+                        Text("Loading lessons...")
+                            .font(AppTheme.Typography.callout)
+                            .foregroundColor(AppTheme.Colors.secondaryText)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppTheme.Spacing.xxxl)
+                } else if viewModel.lessons.isEmpty {
+                    VStack(spacing: AppTheme.Spacing.md) {
+                        Image(systemName: "wifi.slash")
                             .font(.system(size: 48))
                             .foregroundColor(AppTheme.Colors.warmGray)
 
-                        Text("Lessons coming soon")
+                        Text("Unable to load lessons")
                             .font(AppTheme.Typography.headline)
                             .foregroundColor(AppTheme.Colors.primaryText)
 
-                        Text("We're preparing biblical wisdom for this challenge")
-                            .font(AppTheme.Typography.caption)
-                            .foregroundColor(AppTheme.Colors.secondaryText)
-                            .multilineTextAlignment(.center)
+                        if let error = viewModel.errorMessage {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        } else {
+                            Text("Please check your internet connection")
+                                .font(AppTheme.Typography.caption)
+                                .foregroundColor(AppTheme.Colors.secondaryText)
+                        }
+
+                        Button("Try Again") {
+                            Task {
+                                await viewModel.loadLessons()
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(AppTheme.Colors.burntOrange)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, AppTheme.Spacing.xxxl)
                 } else {
+                    // Show lessons for this problem, or all lessons as fallback
+                    let displayLessons = lessonsForProblem.isEmpty ? viewModel.lessons : lessonsForProblem
+
+                    if lessonsForProblem.isEmpty {
+                        Text("Showing all \(viewModel.lessons.count) lessons (filtering coming soon)")
+                            .font(.caption)
+                            .foregroundColor(AppTheme.Colors.secondaryText)
+                            .padding(.horizontal, AppTheme.Spacing.xl)
+                    }
+
                     LazyVStack(spacing: AppTheme.Spacing.sm) {
-                        ForEach(lessonsForProblem) { lesson in
+                        ForEach(displayLessons) { lesson in
                             NavigationLink(destination: LessonDetailView(lesson: lesson, viewModel: viewModel)) {
                                 ProblemFirstLessonRow(lesson: lesson, isCompleted: viewModel.isLessonCompleted(lesson.id))
                             }
@@ -405,6 +481,12 @@ struct ProblemLessonsView: View {
         )
         .navigationTitle(problem.rawValue)
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            // Load lessons if not already loaded
+            if viewModel.lessons.isEmpty {
+                await viewModel.loadLessons()
+            }
+        }
     }
 }
 
@@ -757,6 +839,51 @@ struct StatCardView: View {
 
     var body: some View {
         PremiumStatCard(title: title, value: value)
+    }
+}
+
+// MARK: - Learning Path Preview Card
+struct LearningPathPreviewCard: View {
+    let path: LearningPath
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(path.color.opacity(0.2))
+                    .frame(width: 44, height: 44)
+
+                Image(systemName: path.icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(path.color)
+            }
+
+            // Content
+            Text(path.title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.primaryText)
+                .lineLimit(2)
+
+            Text(path.subtitle)
+                .font(.system(size: 11))
+                .foregroundColor(path.color)
+
+            Text("\(path.lessonCount) lessons")
+                .font(.system(size: 10))
+                .foregroundColor(AppTheme.Colors.warmGray)
+        }
+        .frame(width: 130)
+        .padding(AppTheme.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                .fill(colorScheme == .dark ? AppTheme.Colors.darkCardBackground : AppTheme.Colors.cardBackground)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: AppTheme.CornerRadius.medium)
+                .stroke(path.color.opacity(0.3), lineWidth: 1)
+        )
     }
 }
 

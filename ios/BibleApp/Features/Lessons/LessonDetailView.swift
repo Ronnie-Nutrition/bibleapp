@@ -1,13 +1,19 @@
 import SwiftUI
+import AVFoundation
 
 // MARK: - Lesson Detail View
 struct LessonDetailView: View {
     let lesson: Lesson
     @ObservedObject var viewModel: LessonsViewModel
+    @StateObject private var bookmarksManager = BookmarksManager.shared
+    @StateObject private var audioPlayer = LessonAudioPlayer()
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @State private var isCompleted = false
-    @State private var isFavorite = false
+
+    var isBookmarked: Bool {
+        bookmarksManager.isBookmarked(lesson.id)
+    }
 
     var body: some View {
         ScrollView {
@@ -25,16 +31,26 @@ struct LessonDetailView: View {
 
                     Spacer()
 
-                    // Favorite Button
+                    // Audio Button
                     Button(action: {
-                        isFavorite.toggle()
-                        Task {
-                            await viewModel.toggleFavorite(lessonId: lesson.id)
+                        if audioPlayer.isPlaying {
+                            audioPlayer.stop()
+                        } else {
+                            audioPlayer.speak(lesson: lesson)
                         }
                     }) {
-                        Image(systemName: isFavorite ? "heart.fill" : "heart")
+                        Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(AppTheme.Colors.deepTeal)
+                    }
+
+                    // Bookmark Button
+                    Button(action: {
+                        bookmarksManager.toggleBookmark(lesson.id)
+                    }) {
+                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                             .font(.system(size: 22))
-                            .foregroundColor(isFavorite ? AppTheme.Colors.richBurgundy : AppTheme.Colors.warmGray)
+                            .foregroundColor(isBookmarked ? AppTheme.Colors.burntOrange : AppTheme.Colors.warmGray)
                     }
                 }
                 .padding(.horizontal, AppTheme.Spacing.xl)
@@ -249,7 +265,9 @@ struct LessonDetailView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             isCompleted = viewModel.isLessonCompleted(lesson.id)
-            isFavorite = viewModel.isLessonFavorite(lesson.id)
+        }
+        .onDisappear {
+            audioPlayer.stop()
         }
     }
 
