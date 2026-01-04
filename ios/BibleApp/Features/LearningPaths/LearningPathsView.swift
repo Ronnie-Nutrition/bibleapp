@@ -4,9 +4,14 @@ import SwiftUI
 struct LearningPathsView: View {
     @ObservedObject var viewModel: LessonsViewModel
     @StateObject private var progressManager = LearningPathProgressManager.shared
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
+        PremiumFeatureGate(
+            subscriptionManager: subscriptionManager,
+            featureName: "Learning Paths"
+        ) {
         ScrollView {
             VStack(alignment: .leading, spacing: AppTheme.Spacing.lg) {
                 // Header
@@ -68,6 +73,7 @@ struct LearningPathsView: View {
         )
         .navigationTitle("Learning Paths")
         .navigationBarTitleDisplayMode(.inline)
+        }
     }
 }
 

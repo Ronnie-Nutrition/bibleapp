@@ -6,6 +6,7 @@ struct MainTabView: View {
     @StateObject private var lessonsViewModel = LessonsViewModel()
     @StateObject private var onboardingManager = OnboardingManager.shared
     @StateObject private var bookmarksManager = BookmarksManager.shared
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var selectedTab: Tab = .home
     @Environment(\.colorScheme) var colorScheme
 
@@ -27,12 +28,17 @@ struct MainTabView: View {
                         }
                         .tag(Tab.home)
 
-                    // Saved/Bookmarks Tab
-                    SavedLessonsView(viewModel: lessonsViewModel, bookmarksManager: bookmarksManager)
-                        .tabItem {
-                            Label("Saved", systemImage: "bookmark.fill")
-                        }
-                        .tag(Tab.saved)
+                    // Saved/Bookmarks Tab (Premium)
+                    PremiumFeatureGate(
+                        subscriptionManager: subscriptionManager,
+                        featureName: "Saved Lessons"
+                    ) {
+                        SavedLessonsView(viewModel: lessonsViewModel, bookmarksManager: bookmarksManager)
+                    }
+                    .tabItem {
+                        Label("Saved", systemImage: "bookmark.fill")
+                    }
+                    .tag(Tab.saved)
 
                     // Lessons Tab
                     LessonsListView(viewModel: lessonsViewModel)
@@ -63,6 +69,7 @@ struct MainTabView: View {
 struct HomeView: View {
     @ObservedObject var lessonsViewModel: LessonsViewModel
     @ObservedObject var onboardingManager: OnboardingManager
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var selectedProblem: ProblemCategory?
     @Environment(\.colorScheme) var colorScheme
 
@@ -627,6 +634,7 @@ struct LessonsListView: View {
 // MARK: - Profile View
 struct ProfileView: View {
     @StateObject private var authManager = AuthenticationManager.shared
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var showNotificationPreferences = false
     @Environment(\.colorScheme) var colorScheme
 
@@ -658,6 +666,10 @@ struct ProfileView: View {
                         .cornerRadius(AppTheme.CornerRadius.large)
                         .padding(.horizontal, AppTheme.Spacing.lg)
                         .padding(.top, AppTheme.Spacing.lg)
+
+                        // Subscription Status
+                        SubscriptionStatusView(subscriptionManager: subscriptionManager)
+                            .padding(.horizontal, AppTheme.Spacing.lg)
 
                         // Stats Grid
                         VStack(spacing: AppTheme.Spacing.md) {

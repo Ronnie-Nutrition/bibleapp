@@ -7,9 +7,11 @@ struct LessonDetailView: View {
     @ObservedObject var viewModel: LessonsViewModel
     @StateObject private var bookmarksManager = BookmarksManager.shared
     @StateObject private var audioPlayer = LessonAudioPlayer()
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @State private var isCompleted = false
+    @State private var showPaywall = false
 
     var isBookmarked: Bool {
         bookmarksManager.isBookmarked(lesson.id)
@@ -31,26 +33,48 @@ struct LessonDetailView: View {
 
                     Spacer()
 
-                    // Audio Button
+                    // Audio Button (Premium)
                     Button(action: {
-                        if audioPlayer.isPlaying {
-                            audioPlayer.stop()
+                        if subscriptionManager.isPremium {
+                            if audioPlayer.isPlaying {
+                                audioPlayer.stop()
+                            } else {
+                                audioPlayer.speak(lesson: lesson)
+                            }
                         } else {
-                            audioPlayer.speak(lesson: lesson)
+                            showPaywall = true
                         }
                     }) {
-                        Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(AppTheme.Colors.deepTeal)
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(AppTheme.Colors.deepTeal)
+
+                            if !subscriptionManager.isPremium {
+                                PremiumLockBadge()
+                                    .offset(x: 6, y: -6)
+                            }
+                        }
                     }
 
-                    // Bookmark Button
+                    // Bookmark Button (Premium)
                     Button(action: {
-                        bookmarksManager.toggleBookmark(lesson.id)
+                        if subscriptionManager.isPremium {
+                            bookmarksManager.toggleBookmark(lesson.id)
+                        } else {
+                            showPaywall = true
+                        }
                     }) {
-                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                            .font(.system(size: 22))
-                            .foregroundColor(isBookmarked ? AppTheme.Colors.burntOrange : AppTheme.Colors.warmGray)
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                                .font(.system(size: 22))
+                                .foregroundColor(isBookmarked ? AppTheme.Colors.burntOrange : AppTheme.Colors.warmGray)
+
+                            if !subscriptionManager.isPremium {
+                                PremiumLockBadge()
+                                    .offset(x: 6, y: -6)
+                            }
+                        }
                     }
                 }
                 .padding(.horizontal, AppTheme.Spacing.xl)
@@ -268,6 +292,9 @@ struct LessonDetailView: View {
         }
         .onDisappear {
             audioPlayer.stop()
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(subscriptionManager: subscriptionManager)
         }
     }
 

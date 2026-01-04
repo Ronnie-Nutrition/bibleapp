@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA000001000000000025 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000025 /* SubscriptionManager.swift */; };
+		AA000001000000000026 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000026 /* PaywallView.swift */; };
+		AA000001000000000027 /* PremiumFeatureGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000027 /* PremiumFeatureGate.swift */; };
+		AA000001000000000028 /* SubscriptionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000028 /* SubscriptionStatusView.swift */; };
+		AA000001000000000029 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000029 /* Products.storekit */; };
 		AA000001000000000016 /* BookmarksManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000016 /* BookmarksManager.swift */; };
 		AA000001000000000017 /* SavedLessonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000017 /* SavedLessonsView.swift */; };
 		AA000001000000000018 /* LessonAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000018 /* LessonAudioPlayer.swift */; };
@@ -38,6 +43,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AA000002000000000025 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		AA000002000000000026 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		AA000002000000000027 /* PremiumFeatureGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumFeatureGate.swift; sourceTree = "<group>"; };
+		AA000002000000000028 /* SubscriptionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionStatusView.swift; sourceTree = "<group>"; };
+		AA000002000000000029 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		AA000002000000000016 /* BookmarksManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarksManager.swift; sourceTree = "<group>"; };
 		AA000002000000000017 /* SavedLessonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedLessonsView.swift; sourceTree = "<group>"; };
 		AA000002000000000018 /* LessonAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonAudioPlayer.swift; sourceTree = "<group>"; };
@@ -160,9 +170,21 @@
 				AA000005000000000022 /* LearningPaths */,
 				AA000005000000000011 /* Lessons */,
 				AA000005000000000014 /* Onboarding */,
+				AA000005000000000023 /* Subscription */,
 				AA000005000000000012 /* UserProfile */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		AA000005000000000023 /* Subscription */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000025 /* SubscriptionManager.swift */,
+				AA000002000000000026 /* PaywallView.swift */,
+				AA000002000000000027 /* PremiumFeatureGate.swift */,
+				AA000002000000000028 /* SubscriptionStatusView.swift */,
+			);
+			path = Subscription;
 			sourceTree = "<group>";
 		};
 		AA000005000000000020 /* Audio */ = {
@@ -197,6 +219,7 @@
 				AA000002000000000020 /* Assets.xcassets */,
 				AA000002000000000021 /* LaunchScreen.storyboard */,
 				AA000002000000000022 /* GoogleService-Info.plist */,
+				AA000002000000000029 /* Products.storekit */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -314,6 +337,7 @@
 				AA000001000000000021 /* LaunchScreen.storyboard in Resources */,
 				AA000001000000000022 /* GoogleService-Info.plist in Resources */,
 				AA000001000000000023 /* PrivacyInfo.xcprivacy in Resources */,
+				AA000001000000000029 /* Products.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,6 +348,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA000001000000000025 /* SubscriptionManager.swift in Sources */,
+				AA000001000000000026 /* PaywallView.swift in Sources */,
+				AA000001000000000027 /* PremiumFeatureGate.swift in Sources */,
+				AA000001000000000028 /* SubscriptionStatusView.swift in Sources */,
 				AA000001000000000016 /* BookmarksManager.swift in Sources */,
 				AA000001000000000017 /* SavedLessonsView.swift in Sources */,
 				AA000001000000000018 /* LessonAudioPlayer.swift in Sources */,

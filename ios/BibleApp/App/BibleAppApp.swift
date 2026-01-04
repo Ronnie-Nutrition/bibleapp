@@ -8,12 +8,14 @@ struct BibleAppApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authManager = AuthenticationManager.shared
     @StateObject private var notificationManager = PushNotificationManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     var body: some Scene {
         WindowGroup {
             Group {
                 if authManager.isAuthenticated {
                     MainTabView()
+                        .environmentObject(subscriptionManager)
                 } else {
                     LoginView()
                 }
