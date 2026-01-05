@@ -18,11 +18,5 @@
 		<string>$(AppIdentifierPrefix)com.bibleapp.biblical</string>
 	</array>
 
-	<!-- Associated Domains (for Universal Links / Deep Linking) -->
-	<key>com.apple.developer.associated-domains</key>
-	<array>
-		<string>applinks:bibleapp.com</string>
-		<string>webcredentials:bibleapp.com</string>
-	</array>
 </dict>
 </plist>

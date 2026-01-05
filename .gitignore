@@ -97,6 +97,8 @@ google-services.json
 GoogleService-Info.plist
 firebase-debug.log
 firebase-key.json
+*-prod-key.json
+*-firebase-adminsdk*.json
 *.json.bak
 
 # Environment variables

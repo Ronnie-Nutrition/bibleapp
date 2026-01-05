@@ -65,11 +65,13 @@ class APIClient: NSObject, ObservableObject {
     private let decoder = JSONDecoder()
 
     override init() {
-        // Use localhost for simulator, or your actual backend URL for device
+        // Note: The app uses Firebase directly for lessons.
+        // This API client is for optional backend features.
+        // Set to empty string for production (Firebase-only mode)
         #if targetEnvironment(simulator)
         self.baseURL = "http://localhost:3000"
         #else
-        self.baseURL = ProcessInfo.processInfo.environment["API_URL"] ?? "http://localhost:3000"
+        self.baseURL = "" // Firebase-only mode for production
         #endif
 
         let config = URLSessionConfiguration.default
