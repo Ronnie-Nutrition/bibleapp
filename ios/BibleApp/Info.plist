@@ -6,7 +6,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Biblical Lessons</string>
+	<string>Entrepreneurs Bible</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -75,13 +75,13 @@
 
 	<!-- Privacy Descriptions (Required for App Store) -->
 	<key>NSCameraUsageDescription</key>
-	<string>Biblical Lessons uses your camera to capture profile photos.</string>
+	<string>Entrepreneurs Bible uses your camera to capture profile photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Biblical Lessons accesses your photo library to select profile images.</string>
+	<string>Entrepreneurs Bible accesses your photo library to select profile images.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Biblical Lessons saves images to your photo library.</string>
+	<string>Entrepreneurs Bible saves images to your photo library.</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>Biblical Lessons uses tracking to improve your experience and provide relevant content recommendations.</string>
+	<string>Entrepreneurs Bible uses tracking to improve your experience and provide relevant content recommendations.</string>
 
 	<!-- App Transport Security -->
 	<key>NSAppTransportSecurity</key>
