@@ -169,10 +169,10 @@ struct PaywallView: View {
                 .multilineTextAlignment(.center)
 
             HStack(spacing: AppTheme.Spacing.md) {
-                Link("Terms of Use", destination: URL(string: "https://bibleapp.com/terms")!)
+                Link("Terms of Use", destination: URL(string: "https://ronnie-nutrition.github.io/bibleapp/terms-of-service.html")!)
                 Text("|")
                     .foregroundColor(AppTheme.Colors.warmGray)
-                Link("Privacy Policy", destination: URL(string: "https://bibleapp.com/privacy")!)
+                Link("Privacy Policy", destination: URL(string: "https://ronnie-nutrition.github.io/bibleapp/privacy-policy.html")!)
             }
             .font(AppTheme.Typography.smallCaption)
             .foregroundColor(AppTheme.Colors.burntOrange)

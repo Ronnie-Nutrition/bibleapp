@@ -12,6 +12,8 @@ enum AppEnvironment {
     static let current: AppEnvironment = .production
 
     // MARK: - API Configuration
+    /// Note: This app uses Firebase directly for all data operations.
+    /// The apiBaseURL is only used for optional backend features during development.
     var apiBaseURL: String {
         switch self {
         case .development:
@@ -19,13 +21,12 @@ enum AppEnvironment {
             return "http://localhost:3000"
             #else
             // For testing on physical device during development
-            // Replace with your local machine's IP address
             return "http://localhost:3000"
             #endif
         case .production:
-            // TODO: Replace with your production API URL
-            // Example: "https://api.biblicallessons.com"
-            return "https://YOUR_PRODUCTION_API_URL"
+            // Firebase-only mode - no separate backend API needed
+            // All data operations go through Firebase (Firestore, Auth, etc.)
+            return ""
         }
     }
 

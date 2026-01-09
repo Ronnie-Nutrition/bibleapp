@@ -22,11 +22,11 @@ This guide walks you through preparing your app for the Apple App Store.
 ### Before Submitting (Manual Steps Required)
 - [x] Privacy Policy URL: `https://ronnie-nutrition.github.io/bibleapp/privacy-policy.html`
 - [x] Support URL: `https://ronnie-nutrition.github.io/bibleapp/support.html`
+- [x] Terms of Service URL: `https://ronnie-nutrition.github.io/bibleapp/terms-of-service.html`
 - [x] Enable GitHub Pages (Settings > Pages > Source: /docs folder)
 - [ ] App Store screenshots (6.7", 6.1", 5.5" displays)
 - [ ] App Store Connect record created
 - [ ] TestFlight testing completed
-- [ ] Associated domain (bibleapp.com) configured (if using universal links)
 
 ---
 
@@ -151,9 +151,9 @@ All lessons are crafted to be jargon-free, practical, and immediately applicable
 ```
 
 - Keywords: bible, lessons, entrepreneur, business, faith, leadership, Christianity
-- Support URL: https://yourwebsite.com/support
-- Privacy Policy URL: https://yourwebsite.com/privacy
-- App Privacy Policy: [Fill based on GDPR/privacy requirements]
+- Support URL: https://ronnie-nutrition.github.io/bibleapp/support.html
+- Privacy Policy URL: https://ronnie-nutrition.github.io/bibleapp/privacy-policy.html
+- Terms of Service URL: https://ronnie-nutrition.github.io/bibleapp/terms-of-service.html
 
 #### Screenshots and Preview
 Upload for each device size:
