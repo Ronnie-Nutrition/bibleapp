@@ -6,6 +6,7 @@ import SwiftUI
 class LessonAudioPlayer: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     @Published var isPlaying = false
     @Published var isPaused = false
+    @Published var isPreparing = false
     @Published var progress: Double = 0
 
     private let synthesizer = AVSpeechSynthesizer()
@@ -16,7 +17,17 @@ class LessonAudioPlayer: NSObject, ObservableObject, AVSpeechSynthesizerDelegate
     override init() {
         super.init()
         synthesizer.delegate = self
-        setupAudioSession()
+        // Setup audio session in background to avoid blocking
+        Task {
+            await setupAudioSessionAsync()
+        }
+    }
+
+    // MARK: - Async Audio Session Setup
+    private func setupAudioSessionAsync() async {
+        await MainActor.run {
+            setupAudioSession()
+        }
     }
 
     // MARK: - Audio Session Setup
@@ -34,57 +45,65 @@ class LessonAudioPlayer: NSObject, ObservableObject, AVSpeechSynthesizerDelegate
 
     func speak(lesson: Lesson) {
         stop()
+        isPreparing = true
 
-        // Build the text to speak
-        var textToSpeak = ""
+        // Prepare on background thread to avoid UI freeze
+        Task.detached { [weak self] in
+            // Build the text to speak
+            var textToSpeak = ""
 
-        // Add problem hook if available
-        if let hook = lesson.problemHook {
-            textToSpeak += "\(hook)\n\n"
-        }
-
-        // Add title
-        textToSpeak += "\(lesson.title).\n\n"
-
-        // Add key takeaway
-        textToSpeak += "Key Takeaway: \(lesson.keyTakeaway)\n\n"
-
-        // Add main content
-        textToSpeak += "Lesson:\n\(lesson.content)\n\n"
-
-        // Add Bible verses
-        if !lesson.bibleVerses.isEmpty {
-            textToSpeak += "Scripture References:\n"
-            for verse in lesson.bibleVerses {
-                textToSpeak += "\(verse.reference): \(verse.text)\n"
+            // Add problem hook if available
+            if let hook = lesson.problemHook {
+                textToSpeak += "\(hook)\n\n"
             }
-            textToSpeak += "\n"
-        }
 
-        // Add practical steps
-        if !lesson.practicalSteps.isEmpty {
-            textToSpeak += "How to Apply This:\n"
-            for (index, step) in lesson.practicalSteps.enumerated() {
-                textToSpeak += "Step \(index + 1): \(step)\n"
+            // Add title
+            textToSpeak += "\(lesson.title).\n\n"
+
+            // Add key takeaway
+            textToSpeak += "Key Takeaway: \(lesson.keyTakeaway)\n\n"
+
+            // Add main content
+            textToSpeak += "Lesson:\n\(lesson.content)\n\n"
+
+            // Add Bible verses
+            if !lesson.bibleVerses.isEmpty {
+                textToSpeak += "Scripture References:\n"
+                for verse in lesson.bibleVerses {
+                    textToSpeak += "\(verse.reference): \(verse.text)\n"
+                }
+                textToSpeak += "\n"
+            }
+
+            // Add practical steps
+            if !lesson.practicalSteps.isEmpty {
+                textToSpeak += "How to Apply This:\n"
+                for (index, step) in lesson.practicalSteps.enumerated() {
+                    textToSpeak += "Step \(index + 1): \(step)\n"
+                }
+            }
+
+            let utterance = AVSpeechUtterance(string: textToSpeak)
+
+            // Configure voice
+            utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+            utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9 // Slightly slower for clarity
+            utterance.pitchMultiplier = 1.0
+            utterance.volume = 1.0
+            utterance.preUtteranceDelay = 0.1
+            utterance.postUtteranceDelay = 0.3
+
+            // Switch back to main thread for UI updates and speaking
+            await MainActor.run {
+                guard let self = self else { return }
+                self.totalCharacters = textToSpeak.count
+                self.spokenCharacters = 0
+                self.currentUtterance = utterance
+                self.isPreparing = false
+                self.isPlaying = true
+                self.synthesizer.speak(utterance)
             }
         }
-
-        totalCharacters = textToSpeak.count
-        spokenCharacters = 0
-
-        let utterance = AVSpeechUtterance(string: textToSpeak)
-
-        // Configure voice
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9 // Slightly slower for clarity
-        utterance.pitchMultiplier = 1.0
-        utterance.volume = 1.0
-        utterance.preUtteranceDelay = 0.3
-        utterance.postUtteranceDelay = 0.3
-
-        currentUtterance = utterance
-        isPlaying = true
-        synthesizer.speak(utterance)
     }
 
     func stop() {
@@ -93,6 +112,7 @@ class LessonAudioPlayer: NSObject, ObservableObject, AVSpeechSynthesizerDelegate
         }
         isPlaying = false
         isPaused = false
+        isPreparing = false
         progress = 0
     }
 

@@ -37,6 +37,7 @@ class SubscriptionManager: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var purchaseInProgress = false
+    @Published var purchaseSuccessful = false
 
     // MARK: - Computed Properties
     var isPremium: Bool {
@@ -94,6 +95,7 @@ class SubscriptionManager: ObservableObject {
             let transaction = try checkVerified(verification)
             await updateSubscriptionStatus()
             await transaction.finish()
+            purchaseSuccessful = true
 
         case .userCancelled:
             break

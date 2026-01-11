@@ -36,7 +36,7 @@ struct LessonDetailView: View {
                     // Audio Button (Premium)
                     Button(action: {
                         if subscriptionManager.isPremium {
-                            if audioPlayer.isPlaying {
+                            if audioPlayer.isPlaying || audioPlayer.isPreparing {
                                 audioPlayer.stop()
                             } else {
                                 audioPlayer.speak(lesson: lesson)
@@ -46,9 +46,15 @@ struct LessonDetailView: View {
                         }
                     }) {
                         ZStack(alignment: .topTrailing) {
-                            Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                .font(.system(size: 28))
-                                .foregroundColor(AppTheme.Colors.deepTeal)
+                            if audioPlayer.isPreparing {
+                                ProgressView()
+                                    .frame(width: 28, height: 28)
+                                    .tint(AppTheme.Colors.deepTeal)
+                            } else {
+                                Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(AppTheme.Colors.deepTeal)
+                            }
 
                             if !subscriptionManager.isPremium {
                                 PremiumLockBadge()
@@ -56,6 +62,7 @@ struct LessonDetailView: View {
                             }
                         }
                     }
+                    .disabled(audioPlayer.isPreparing)
 
                     // Bookmark Button (Premium)
                     Button(action: {

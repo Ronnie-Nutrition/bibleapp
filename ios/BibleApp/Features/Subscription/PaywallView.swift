@@ -7,6 +7,59 @@ struct PaywallView: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
+        Group {
+            if subscriptionManager.purchaseSuccessful {
+                successView
+            } else {
+                mainPaywallView
+            }
+        }
+        .background(
+            colorScheme == .dark ? AppTheme.Colors.darkBackground : AppTheme.Colors.background
+        )
+        .onChange(of: subscriptionManager.purchaseSuccessful) { isSuccessful in
+            if isSuccessful {
+                // Auto-dismiss after showing success for 2 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    subscriptionManager.purchaseSuccessful = false
+                    dismiss()
+                }
+            }
+        }
+    }
+
+    // MARK: - Success View
+    private var successView: some View {
+        VStack(spacing: AppTheme.Spacing.xl) {
+            Spacer()
+
+            ZStack {
+                Circle()
+                    .fill(AppTheme.Colors.successGreen.opacity(0.15))
+                    .frame(width: 120, height: 120)
+
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 80))
+                    .foregroundColor(AppTheme.Colors.successGreen)
+            }
+
+            Text("You're All Set!")
+                .font(AppTheme.Typography.largeTitle)
+                .foregroundColor(AppTheme.Colors.primaryText)
+
+            Text("Welcome to Premium! You now have full access to all features.")
+                .font(AppTheme.Typography.body)
+                .foregroundColor(AppTheme.Colors.secondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, AppTheme.Spacing.xl)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // MARK: - Main Paywall View
+    private var mainPaywallView: some View {
         ScrollView {
             VStack(spacing: AppTheme.Spacing.xxl) {
                 headerSection
@@ -20,9 +73,6 @@ struct PaywallView: View {
             }
             .padding(.horizontal, AppTheme.Spacing.xl)
         }
-        .background(
-            colorScheme == .dark ? AppTheme.Colors.darkBackground : AppTheme.Colors.background
-        )
     }
 
     // MARK: - Header Section
