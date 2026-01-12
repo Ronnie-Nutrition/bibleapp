@@ -45,12 +45,16 @@ class PushNotificationManager: NSObject, ObservableObject {
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
                 }
+                #if DEBUG
                 print("✓ Notification permission granted")
+                #endif
             }
 
             return granted
         } catch {
+            #if DEBUG
             print("✗ Error requesting notification permission: \(error.localizedDescription)")
+            #endif
             return false
         }
     }
@@ -66,7 +70,9 @@ class PushNotificationManager: NSObject, ObservableObject {
             if let token = notification.userInfo?["token"] as? String {
                 Task { @MainActor in
                     self?.fcmToken = token
+                    #if DEBUG
                     print("✓ FCM Token updated: \(String(token.prefix(20)))...")
+                    #endif
                 }
             }
         }
@@ -75,22 +81,34 @@ class PushNotificationManager: NSObject, ObservableObject {
     func saveFCMToken(_ token: String, for userId: String) async {
         do {
             try await apiClient.saveFCMToken(userId: userId, token: token)
+            #if DEBUG
             print("✓ FCM Token saved to backend for user: \(userId)")
+            #endif
         } catch let error as APIError {
+            #if DEBUG
             print("✗ Error saving FCM token: \(error.localizedDescription)")
+            #endif
         } catch {
+            #if DEBUG
             print("✗ Error saving FCM token: \(error.localizedDescription)")
+            #endif
         }
     }
 
     func removeFCMToken(_ token: String, for userId: String) async {
         do {
             try await apiClient.removeFCMToken(userId: userId, token: token)
+            #if DEBUG
             print("✓ FCM Token removed from backend")
+            #endif
         } catch let error as APIError {
+            #if DEBUG
             print("✗ Error removing FCM token: \(error.localizedDescription)")
+            #endif
         } catch {
+            #if DEBUG
             print("✗ Error removing FCM token: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -123,7 +141,9 @@ class PushNotificationManager: NSObject, ObservableObject {
     // MARK: - Notification Handling
 
     func handleLessonNotification(_ lessonId: String) {
+        #if DEBUG
         print("📖 Handling lesson notification: \(lessonId)")
+        #endif
 
         // TODO: Navigate to lesson detail view
         // This would typically be done by updating a navigation state
@@ -132,7 +152,9 @@ class PushNotificationManager: NSObject, ObservableObject {
     }
 
     func handleNotificationType(_ type: String, data: [AnyHashable: Any]) {
+        #if DEBUG
         print("🔔 Handling notification type: \(type)")
+        #endif
 
         let stringKeyData = data.reduce(into: [String: Any]()) { result, item in
             if let key = item.key as? String {
@@ -150,7 +172,9 @@ class PushNotificationManager: NSObject, ObservableObject {
         case "reminder":
             handleReminderNotification(data: stringKeyData)
         default:
+            #if DEBUG
             print("⚠️  Unknown notification type: \(type)")
+            #endif
         }
 
         logNotificationAction(type: type)
@@ -159,25 +183,33 @@ class PushNotificationManager: NSObject, ObservableObject {
     // MARK: - Specific Notification Handlers
 
     private func handleWelcomeNotification() {
+        #if DEBUG
         print("👋 Welcome notification handled")
+        #endif
         // TODO: Show welcome screen or toast
     }
 
     private func handleDailyLessonNotification(data: [String: Any]) {
         if let lessonId = data["lessonId"] as? String {
+            #if DEBUG
             print("📚 Daily lesson notification: \(lessonId)")
+            #endif
             handleLessonNotification(lessonId)
         }
     }
 
     private func handleAnnouncementNotification(data: [String: Any]) {
+        #if DEBUG
         print("📣 Announcement notification handled")
+        #endif
         // TODO: Show announcement banner or modal
     }
 
     private func handleReminderNotification(data: [String: Any]) {
         if let lessonId = data["lessonId"] as? String {
+            #if DEBUG
             print("⏰ Reminder notification: \(lessonId)")
+            #endif
             handleLessonNotification(lessonId)
         }
     }
@@ -185,8 +217,10 @@ class PushNotificationManager: NSObject, ObservableObject {
     // MARK: - Analytics
 
     private func logNotificationAction(type: String, lessonId: String = "") {
+        #if DEBUG
         // Analytics logging - using print for now, can integrate with analytics service later
         print("📊 Analytics: \(type) action for lesson: \(lessonId) at \(Date())")
+        #endif
     }
 
     // MARK: - Notification History
@@ -204,32 +238,48 @@ class PushNotificationManager: NSObject, ObservableObject {
     func subscribeToTopic(_ topic: String) async {
         do {
             guard let token = fcmToken else {
+                #if DEBUG
                 print("⚠️  No FCM token available to subscribe")
+                #endif
                 return
             }
 
             try await apiClient.subscribeToTopic(tokens: [token], topic: topic)
+            #if DEBUG
             print("✓ Subscribed to topic: \(topic)")
+            #endif
         } catch let error as APIError {
+            #if DEBUG
             print("✗ Error subscribing to topic: \(error.localizedDescription)")
+            #endif
         } catch {
+            #if DEBUG
             print("✗ Error subscribing to topic: \(error.localizedDescription)")
+            #endif
         }
     }
 
     func unsubscribeFromTopic(_ topic: String) async {
         do {
             guard let token = fcmToken else {
+                #if DEBUG
                 print("⚠️  No FCM token available to unsubscribe")
+                #endif
                 return
             }
 
             try await apiClient.unsubscribeFromTopic(tokens: [token], topic: topic)
+            #if DEBUG
             print("✓ Unsubscribed from topic: \(topic)")
+            #endif
         } catch let error as APIError {
+            #if DEBUG
             print("✗ Error unsubscribing from topic: \(error.localizedDescription)")
+            #endif
         } catch {
+            #if DEBUG
             print("✗ Error unsubscribing from topic: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -238,7 +288,9 @@ class PushNotificationManager: NSObject, ObservableObject {
     func subscribeToDefaultTopics() async {
         await subscribeToTopic("lessons")
         await subscribeToTopic("announcements")
+        #if DEBUG
         print("✓ Subscribed to default topics")
+        #endif
     }
 }
 

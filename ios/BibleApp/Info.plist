@@ -84,8 +84,6 @@
 	<string>Entrepreneurs Bible accesses your photo library to select profile images.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Entrepreneurs Bible saves images to your photo library.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Entrepreneurs Bible uses tracking to improve your experience and provide relevant content recommendations.</string>
 
 	<!-- App Transport Security -->
 	<key>NSAppTransportSecurity</key>

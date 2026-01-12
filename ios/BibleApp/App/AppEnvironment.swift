@@ -70,6 +70,7 @@ enum AppEnvironment {
 
     // MARK: - Debug Helpers
     static func printConfiguration() {
+        #if DEBUG
         guard current.enableDebugLogging else { return }
         print("========================================")
         print("App Environment: \(current)")
@@ -77,5 +78,6 @@ enum AppEnvironment {
         print("App Version: \(appVersion) (\(buildNumber))")
         print("Bundle ID: \(bundleIdentifier)")
         print("========================================")
+        #endif
     }
 }

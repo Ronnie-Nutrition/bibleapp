@@ -509,7 +509,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BibleApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Biblical Lessons";
+				INFOPLIST_KEY_CFBundleDisplayName = "Entrepreneurs Bible";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -543,7 +543,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BibleApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Biblical Lessons";
+				INFOPLIST_KEY_CFBundleDisplayName = "Entrepreneurs Bible";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

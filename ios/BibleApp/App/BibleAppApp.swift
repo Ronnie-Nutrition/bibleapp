@@ -47,9 +47,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             DispatchQueue.main.async {
                 if granted {
                     UIApplication.shared.registerForRemoteNotifications()
+                    #if DEBUG
                     print("✓ Notification permission granted")
+                    #endif
                 } else if let error = error {
+                    #if DEBUG
                     print("✗ Notification permission error: \(error.localizedDescription)")
+                    #endif
                 }
             }
         }
@@ -63,7 +67,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
+        #if DEBUG
         print("✓ APNs Device Token registered")
+        #endif
         Messaging.messaging().apnsToken = deviceToken
     }
 
@@ -71,7 +77,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
+        #if DEBUG
         print("✗ Failed to register for remote notifications: \(error.localizedDescription)")
+        #endif
     }
 }
 
@@ -80,7 +88,9 @@ extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else { return }
 
+        #if DEBUG
         print("✓ FCM Token received: \(String(fcmToken.prefix(20)))...")
+        #endif
 
         // Send token to backend
         Task {
@@ -110,9 +120,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = notification.request.content.userInfo
 
+        #if DEBUG
         print("📬 Notification received while app in foreground:")
         print("  Title: \(notification.request.content.title)")
         print("  Body: \(notification.request.content.body)")
+        #endif
 
         // Log the notification
         PushNotificationManager.shared.logReceivedNotification(userInfo)
@@ -133,19 +145,25 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = response.notification.request.content.userInfo
 
+        #if DEBUG
         print("📲 Notification tapped:")
         print("  Title: \(response.notification.request.content.title)")
         print("  Body: \(response.notification.request.content.body)")
+        #endif
 
         // Handle notification actions based on type
         if let lessonId = userInfo["lessonId"] as? String {
+            #if DEBUG
             print("  Lesson ID: \(lessonId)")
+            #endif
             // TODO: Navigate to lesson detail
             PushNotificationManager.shared.handleLessonNotification(lessonId)
         }
 
         if let type = userInfo["type"] as? String {
+            #if DEBUG
             print("  Type: \(type)")
+            #endif
             PushNotificationManager.shared.handleNotificationType(type, data: userInfo)
         }
 

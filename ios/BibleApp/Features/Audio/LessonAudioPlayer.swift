@@ -37,7 +37,9 @@ class LessonAudioPlayer: NSObject, ObservableObject, AVSpeechSynthesizerDelegate
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.duckOthers])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
+            #if DEBUG
             print("Failed to set up audio session: \(error)")
+            #endif
         }
     }
 

@@ -472,7 +472,9 @@ class NotificationPreferencesViewModel: ObservableObject {
         }
 
         // TODO: Implement API call to update preference
+        #if DEBUG
         print("Updating preference \(key) = \(value) for user \(userId)")
+        #endif
         isLoading = false
     }
 
@@ -507,7 +509,9 @@ class NotificationPreferencesViewModel: ObservableObject {
         let timeString = formatter.string(from: time)
 
         // TODO: Implement API call to update notification time
+        #if DEBUG
         print("Notification time updated to: \(timeString) for user \(userId)")
+        #endif
         isLoading = false
     }
 
@@ -516,7 +520,9 @@ class NotificationPreferencesViewModel: ObservableObject {
         errorMessage = nil
 
         // TODO: Implement API call to update notification type
+        #if DEBUG
         print("Updating notification type \(type) = \(enabled)")
+        #endif
         isLoading = false
     }
 
@@ -532,7 +538,9 @@ class NotificationPreferencesViewModel: ObservableObject {
 
         let categories = preferredCategories.map { $0.rawValue }
         // TODO: Implement API call to update preferred categories
+        #if DEBUG
         print("Updating preferred categories: \(categories) for user \(userId)")
+        #endif
         isLoading = false
     }
 
@@ -558,7 +566,9 @@ class NotificationPreferencesViewModel: ObservableObject {
         preferredCategories = []
 
         isLoading = false
+        #if DEBUG
         print("Preferences reset to defaults")
+        #endif
     }
 }
 

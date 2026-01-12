@@ -119,7 +119,9 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
                 let lesson = try document.data(as: Lesson.self)
                 lessons.append(lesson)
             } catch {
+                #if DEBUG
                 print("Error decoding lesson \(document.documentID): \(error)")
+                #endif
             }
         }
         return lessons.sorted { $0.title < $1.title }
@@ -137,7 +139,9 @@ class FirebaseService: NSObject, FirebaseServiceProtocol {
                 let lesson = try document.data(as: Lesson.self)
                 lessons.append(lesson)
             } catch {
+                #if DEBUG
                 print("Error decoding lesson \(document.documentID): \(error)")
+                #endif
             }
         }
         return lessons.sorted { $0.title < $1.title }
